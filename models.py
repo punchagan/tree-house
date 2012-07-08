@@ -25,27 +25,29 @@ class BaseMixin(object):
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
 
-# --- Models ------------------------------------------------------------------
+class UserBase(BaseMixin):
+    """ Base class for user definition.
 
-# FIXME: Use lastuser stuff later
-class UserBase(BaseMixin, db.Model):
+    # FIXME: Use lastuser stuff later
     """
-    Base class for user definition.
-    """
-    __tablename__ = 'user'
     userid = db.Column(db.String(22), unique=True, nullable=False)
     username = db.Column(db.Unicode(80), unique=True, nullable=True)  # Usernames are optional
     fullname = db.Column(db.Unicode(80), default=u'', nullable=False)
     email = db.Column(db.Unicode(80), unique=True, nullable=True)  # We may not get an email address
-    # room = db.relationship('Room')
 
     def __repr__(self):
         return "<User('%s','%s', '%s')>" % (self.userid, self.fullname, self.email)
 
+# --- Models ------------------------------------------------------------------
+
+class User(UserBase, db.Model):
+    __tablename__ = 'user'
+    description = db.Column(db.Text, default=u'', nullable=True)
+
 class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
     user_id = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)
-    user = db.relationship(UserBase, primaryjoin=user_id == UserBase.userid,
+    user = db.relationship(UserBase, primaryjoin=user_id == User.userid,
                            backref=db.backref('room',
                                               cascade="all, delete-orphan"))
     address = db.Column(db.Text, default=u'', nullable=False)
