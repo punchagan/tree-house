@@ -12,12 +12,10 @@ class ROOM_TYPES:
     OTHERS = 5
 
 class ROOM_PREF:
-    BACHELORS = 0 # FIXME: do we need another male option?
+    BACHELORS = 0 
     FAMILY = 1
-    FEMALE = 2
-    MALE = 3
-    STUDENTS = 5
-    OTHERS = 6
+    STUDENTS = 2
+    OTHERS = 3
 
 # --- Mixins ------------------------------------------------------------------
 
@@ -27,7 +25,7 @@ class BaseMixin(object):
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
 
 # FIXME: Use lastuser stuff later
-class UserBase(BaseMixin):
+class UserBase(BaseMixin, db.Model):
     """
     Base class for user definition.
     """
@@ -43,20 +41,14 @@ class UserBase(BaseMixin):
 
 # --- Models ------------------------------------------------------------------
 
-class User(UserBase, db.Model):
-    __tablename__ = 'user'
-    description = db.Column(db.Text, default=u'', nullable=False)
-
-class Room(BaseMixin):
+class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship(User, primaryjoin=user_id == User.id,
-                           backref=db.backref('spaces', # FIXME: spaces?
-                                              cascade="all, delete-orphan"))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)
+    # user = db.relationship(User, primaryjoin=user_id == User.id,
+    #                        backref=db.backref('spaces', # FIXME: spaces?
+    #                                           cascade="all, delete-orphan"))
     address = db.Column(db.Text, default=u'', nullable=False)
     room_type = db.Column(db.Integer, default=ROOM_TYPES.BHK1, nullable=False)
     room_rent = db.Column(db.Integer, default=0, nullable=False)
     room_pref = db.Column(db.Integer, default=ROOM_PREF.BACHELORS, nullable=True)
-    available_from = db.Column(db.DateTime, nullable=False)
-
-    
+    available_from = db.Column(db.DateTime, nullable=False)    
