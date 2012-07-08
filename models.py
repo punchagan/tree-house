@@ -60,8 +60,9 @@ class Room(BaseMixin, db.Model):
     longitude = db.Column(db.Float, nullable=False)
 
     starting = db.Column(db.DateTime, nullable=False) # required/available starting from
-    available = db.Column(db.Boolean, default=True, nullable=False) # available/required
+    is_available = db.Column(db.Boolean, default=True, nullable=False) # available/required
 
     room_type = db.Column(db.Integer, default=ROOM_TYPES.BHK1, nullable=False)
     room_rent = db.Column(db.Integer, default=0, nullable=False)
     room_pref = db.Column(db.Integer, default=ROOM_PREF.FAMILY, nullable=True)
+    room_description = db.Column(db.Text, default=u'', nullable=False)
