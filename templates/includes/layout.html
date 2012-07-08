@@ -1,0 +1,24 @@
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{{ title }}{% endblock %} — {{ config['SITE_TITLE'] }}</title>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class=page>
+<h1>{{ config['SITE_TITLE'] }} </h1>
+  <div class=metanav>
+  {% if not session.logged_in %}
+    <a href="{{ url_for('login') }}">log in</a>
+  {% else %}
+    <a href="{{ url_for('logout') }}">log out</a>
+  {% endif %}
+  </div>
+  {% block flash_messages %}
+    {% for message in get_flashed_messages() %}
+      <div class=flash>{{ message }}</div>
+    {% endfor %}  
+  {% endblock %}
+  {% block content %}{% endblock %}
+</div>
+</body>
+</html>
