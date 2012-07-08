@@ -1,9 +1,29 @@
 {% extends "includes/layout.html" %}
 
 {% block content %}
-{% if content %}
-{{ content }}
-{% else %}
-<p>Hello World</p>
-{% endif %}
+<div id="content">
+
+<p>A clean solution for advertising and locating houses for rent.
+</p>
+<p>
+We hope that this site will solve the following problems for users --
+</p>
+<ul>
+<li>Often, a person new to a city, doesn't know the geography of a city
+  and finds it difficult to look for houses in the close vicinity of
+  her workplace.
+</li>
+<li>Many of the houses listed as available are occupied long ago, but
+  nobody really bothers to update the websites.
+</li>
+<li>The description given by owners often paints a rosier picture than
+  reality.
+</li>
+<li>The contact workflow doesn't work well in many sites.
+</li>
+</ul>
+
+# FIXME: Think about what to show on the front page and change content above.
+</div>
+
 {% endblock %}

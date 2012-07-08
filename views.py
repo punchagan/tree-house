@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from flask import (Markup, request, render_template, session, 
+from flask import (request, render_template, session,
     flash, redirect, url_for)
 from app import app
 
 @app.route('/')
 def index():
     # FIXME: Think about what the index page should be like
-    content = Markup('</p>Hello World!!!</p>')
-    return render_template('index.html', title='Tree House', content=content)
+    return render_template('index.html', title='Tree House')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
