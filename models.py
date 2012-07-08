@@ -1,6 +1,9 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from app import app
 
+__all__ = ['db', 'User', 'Room']
+
+
 db = SQLAlchemy(app)
 
 class ROOM_TYPES:
@@ -47,7 +50,7 @@ class User(UserBase, db.Model):
 class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
     user_id = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)
-    user = db.relationship(UserBase, primaryjoin=user_id == User.userid,
+    user = db.relationship(User, primaryjoin=user_id == User.userid,
                            backref=db.backref('room',
                                               cascade="all, delete-orphan"))
 
