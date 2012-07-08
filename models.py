@@ -1,10 +1,9 @@
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask.ext.lastuser.sqlalchemy import UserBase
 from app import app
 
 db = SQLAlchemy(app)
 
-class ROOMTYPES:
+class ROOM_TYPES:
     PG = 0
     BHK1 = 1
     BHK2 = 2
@@ -12,8 +11,8 @@ class ROOMTYPES:
     STUDIO = 4
     OTHERS = 5
 
-class ROOMPREF:
-    BACHELORS = 0
+class ROOM_PREF:
+    BACHELORS = 0 # FIXME: do we need another male option?
     FAMILY = 1
     FEMALE = 2
     MALE = 3
@@ -27,10 +26,6 @@ class BaseMixin(object):
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
 
-class User(UserBase, db.Model):
-    __tablename__ = 'user'
-    description = db.Column(db.Text, default=u'', nullable=False)
-
 # FIXME: Use lastuser stuff later
 class UserBase(BaseMixin):
     """
@@ -41,7 +36,7 @@ class UserBase(BaseMixin):
     username = db.Column(db.Unicode(80), unique=True, nullable=True)  # Usernames are optional
     fullname = db.Column(db.Unicode(80), default=u'', nullable=False)
     email = db.Column(db.Unicode(80), unique=True, nullable=True)  # We may not get an email address
-    room = relationship("Room")
+    room = db.relationship('Room')
 
     def __repr__(self):
         return "<User('%s','%s', '%s')>" % (self.userid, self.fullname, self.email)
@@ -56,12 +51,12 @@ class Room(BaseMixin):
     __tablename__ = 'room'
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship(User, primaryjoin=user_id == User.id,
-                           backref=db.backref('spaces',
+                           backref=db.backref('spaces', # FIXME: spaces?
                                               cascade="all, delete-orphan"))
     address = db.Column(db.Text, default=u'', nullable=False)
-    roomtype = db.Column(db.Integer, default=ROOMTYPES.BHK1, nullable=False)
-    roomrent = db.Column(db.Integer, default=0, nullable=False)
-    roompref = db.Column(db.Integer, default=0, nullable=True)
-    availablefrom = db.Column(db.DateTime, nullable=False)
+    room_type = db.Column(db.Integer, default=ROOM_TYPES.BHK1, nullable=False)
+    room_rent = db.Column(db.Integer, default=0, nullable=False)
+    room_pref = db.Column(db.Integer, default=ROOM_PREF.BACHELORS, nullable=True)
+    available_from = db.Column(db.DateTime, nullable=False)
 
     
