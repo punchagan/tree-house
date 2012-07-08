@@ -50,8 +50,15 @@ class Room(BaseMixin, db.Model):
     user = db.relationship(UserBase, primaryjoin=user_id == User.userid,
                            backref=db.backref('room',
                                               cascade="all, delete-orphan"))
-    address = db.Column(db.Text, default=u'', nullable=False)
+
+    address = db.Column(db.Text, default=u'', nullable=False) # Without city
+    city = db.Column(db.Text, default=u'', nullable=False) # Can reduce query time for distances
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+
+    starting = db.Column(db.DateTime, nullable=False) # required/available starting from
+    available = db.Column(db.Boolean, default=True, nullable=False) # available/required
+
     room_type = db.Column(db.Integer, default=ROOM_TYPES.BHK1, nullable=False)
     room_rent = db.Column(db.Integer, default=0, nullable=False)
     room_pref = db.Column(db.Integer, default=ROOM_PREF.FAMILY, nullable=True)
-    available_from = db.Column(db.DateTime, nullable=False)    

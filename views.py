@@ -2,6 +2,8 @@
 from flask import (request, render_template, session,
     flash, redirect, url_for)
 from app import app
+from forms import RoomForm
+
 
 @app.route('/')
 def index():
@@ -28,6 +30,17 @@ def logout():
     session.pop('logged_in', None)
     flash('You successfully logged out')
     return redirect('/')
+
+@app.route('/new', methods=['GET', 'POST'])
+# FIXME: enforce login requirements!
+def post_ad():
+    form = RoomForm()
+    if form.validate_on_submit():
+        # FIXME: Update the db and change the redirect url?
+        return redirect(url_for('show_entries'))
+    return render_template('autoform.html', form=form,
+                            title="Post a new advertisement",
+                            submit="Post ad")
 
 @app.route('/show_entries')
 def show_entries():

@@ -1,0 +1,6 @@
+{% extends "includes/layout.html" %}
+{% from "includes/forms.html" import renderform %}
+
+{% block content %}
+  {{ renderform(form, formid, submit, message) }}
+{% endblock %}
