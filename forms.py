@@ -8,6 +8,15 @@ class RoomForm(wtf.Form):
                                  validators=[wtf.Required(), wtf.Email()],
             description="An email address for contact. Not displayed anywhere")
 
+    address = wtf.TextField('Street Address', validators=[wtf.Required()],
+        description="Address of the location of your room, or in whose" + \
+        "vicinity you want to search.  For better results use landmarks nearby.")
+    # FIXME: May later be changed to a 'drop down'
+    city = wtf.TextField('City', validators=[wtf.Required()])
+    # These fields will become readonly, thanks to js.
+    latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
+    longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
+
     is_available = wtf.RadioField('Available or Wanted?',
                                    validators=[wtf.Required()],
                                    choices=[(True, 'Available'),
