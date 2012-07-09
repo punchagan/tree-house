@@ -45,7 +45,3 @@ def post_ad():
 @app.route('/show_entries')
 def show_entries():
     return render_template('show_entries.html')
-
-@app.route('/roi')
-def roi_():
-    return render_template('roi.html')
