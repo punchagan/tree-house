@@ -1,4 +1,6 @@
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.lastuser.sqlalchemy import UserBase
+
 from app import app
 
 __all__ = ['db', 'User', 'Room']
@@ -27,19 +29,6 @@ class BaseMixin(object):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
-
-class UserBase(BaseMixin):
-    """ Base class for user definition.
-
-    # FIXME: Use lastuser stuff later
-    """
-    userid = db.Column(db.String(22), unique=True, nullable=False)
-    username = db.Column(db.Unicode(80), unique=True, nullable=True)  # Usernames are optional
-    fullname = db.Column(db.Unicode(80), default=u'', nullable=False)
-    email = db.Column(db.Unicode(80), unique=True, nullable=True)  # We may not get an email address
-
-    def __repr__(self):
-        return "<User('%s','%s', '%s')>" % (self.userid, self.fullname, self.email)
 
 # --- Models ------------------------------------------------------------------
 
