@@ -1,1 +1,37 @@
 {% extends "includes/layout.html" %}
+{% block content %}
+<table class="listing">
+  <thead>
+    <tr>
+      <th class="num">#</th>
+      <th>Available</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>Starting</th>
+      <th>Type</th>
+      <th>Rent</th>
+    </tr>
+  </thead>
+  {% for room in rooms %}
+    <tbody class="link separator">
+      <tr>
+        <td class="num">{{ loop.index }}</td>
+        <td>{{ room.is_available }}</td>
+        <td>{{ room.address }}</a></td>
+        <td>{{ room.city }}</a></td>
+        <td>{{ room.starting }}</a></td>
+        <td>{{ room.room_type }}</a></td>
+        <td>{{ room.room_rent }}</a></td>
+      </tr>
+    <tbody>
+  {% else %}
+    <tbody>
+      <tr>
+        <td colspan="9">
+          <em>(No ads have been posted)</em>
+        </td>
+      </tr>
+    </tbody>
+  {% endfor %}
+</table>
+{% endblock %}
