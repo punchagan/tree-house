@@ -13,9 +13,9 @@ SITE_TITLE = 'Tree House'
 #: LastUser server
 LASTUSER_SERVER = 'http://muse-amuse.in:7000/'
 #: LastUser client id
-LASTUSER_CLIENT_ID = 'D946G96jQnmZj9anczo0_Q'
+LASTUSER_CLIENT_ID = 't_zvjbdjRJyH1G9iIQI9hA'
 #: LastUser client secret
-LASTUSER_CLIENT_SECRET = 'xPFf9WKUQamntJ-kTmj1pAjxlWZMQZSRW-EbrMPSbsLQ'
+LASTUSER_CLIENT_SECRET = 'Xq5sKFDhQUu8GAmGUF3mqgGNo7l7ZWSm64_gjqi0J2IQ'
 
 app = Flask(__name__)
 
