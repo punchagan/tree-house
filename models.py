@@ -48,7 +48,7 @@ class Room(BaseMixin, db.Model):
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
 
-    starting = db.Column(db.DateTime, nullable=False) # required/available starting from
+    starting = db.Column(db.Date, nullable=False) # required/available starting from
     is_available = db.Column(db.Boolean, default=True, nullable=False) # available/required
 
     room_type = db.Column(db.Integer, default=ROOM_TYPES.BHK1, nullable=False)
