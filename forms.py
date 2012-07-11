@@ -17,13 +17,10 @@ class RoomForm(wtf.Form):
     latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
     longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
 
-    is_available = wtf.RadioField('Available or Wanted?',
-                                   validators=[wtf.Required()],
-                                   choices=[(True, 'Available'),
-                                            (False, 'Required'),
-                                           ])
+    is_available = wtf.BooleanField('Available or Wanted?')
+
     starting = wtf.DateField('Available/Required from',
-                             description="Enter a date in YYYY/MM/DD format.",
+                             description="Enter a date in yyyy-mm-dd format.",
                              validators=[wtf.Required()])
 
     room_type = wtf.RadioField('Room Type', coerce=int,
