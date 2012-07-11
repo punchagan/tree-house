@@ -8,17 +8,20 @@
 <div class=page>
 <h1>{{ title or config['SITE_TITLE'] }} </h1>
   <div class=metanav>
-  <a href="{{ url_for('post_ad') }}">new ad</a>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
+  <ul>
+  <li><a href="{{ url_for('post_ad') }}">new ad</a></li>
+  {% if g.user -%}
+    <li><a href="{{ config['LASTUSER_SERVER'] }}profile">{{ g.user.fullname }}</a></li>
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
   {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
+    <li><a href="{{ url_for('login') }}">Login with Twitter or Google</a></li>
   {% endif %}
+  </ul>
   </div>
   {% block flash_messages %}
     {% for message in get_flashed_messages() %}
       <div class=flash>{{ message }}</div>
-    {% endfor %}  
+    {% endfor %}
   {% endblock %}
   {% block content %}{% endblock %}
 </div>
