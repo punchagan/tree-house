@@ -38,10 +38,9 @@ class User(UserBase, db.Model):
 
 class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.userid'), nullable=False)
-    user = db.relationship(User, primaryjoin=user_id == User.userid,
-                           backref=db.backref('room',
-                                              cascade="all, delete-orphan"))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship(User, primaryjoin=user_id == User.id,
+                    backref=db.backref('rooms', cascade="all, delete-orphan"))
 
     address = db.Column(db.Text, default=u'', nullable=False) # Without city
     city = db.Column(db.Text, default=u'', nullable=False) # Can reduce query time for distances
