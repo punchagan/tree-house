@@ -78,3 +78,19 @@ def post_ad():
 def show_entries():
     rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at')).all()
     return render_template('show_entries.html', rooms=rooms)
+
+@app.route('/distance/<coordinates>')
+def calculate_distance(coordinates):
+    lat, lng = [float(num) for num in coordinates.split(',')]
+    drange = 4 # Distance in Kilometers
+    haversine = """(3959 * acos(
+                            cos(radians(latitude)) * cos(radians( %(lat)f )) *
+                                cos( radians(%(lng)f) - radians(longitude) ) +
+                            sin(radians(latitude)) * sin(radians( %(lat)f ))
+                            )
+                    )""" % { 'lat': float(lat), 'lng': float(lng) }
+    query = "SELECT *, %(haversine)s AS distance FROM room " \
+            "HAVING distance <= %(drange)d ORDER BY distance" % {'drange': int(drange),
+                                                        'haversine': haversine}
+    rooms = db.engine.execute(query).fetchall()
+    return str(rooms)
