@@ -54,3 +54,27 @@ class Room(BaseMixin, db.Model):
     room_rent = db.Column(db.Integer, default=0, nullable=False)
     room_pref = db.Column(db.Integer, default=ROOM_PREF.FAMILY, nullable=True)
     room_description = db.Column(db.Text, default=u'', nullable=False)
+
+    def __repr__(self):
+        return '%(address)s, %(city)s, %(room_type)s, %(latitude)s, %(longitude)s' % self.__dict__
+
+    @staticmethod
+    def distance_subquery(coords, drange=5):
+        t = db.session.query(Room.id, Room.calculate_haversine(Room.coords(), coords).label('distance')).subquery('t')
+        return t
+
+    @staticmethod
+    def calculate_haversine(coord1, coord2):
+        lat1, lng1 = coord1
+        lat2, lng2 = coord2
+        f = db.func
+        haversine = 3959 * f.acos(
+                            f.cos(f.radians(lat1)) * f.cos(f.radians(lat2)) *
+                                f.cos( f.radians(lng2) - f.radians(lng1) ) +
+                            f.sin(f.radians(lat1)) * f.sin(f.radians(lat2))
+                            )
+        return haversine
+
+    @classmethod
+    def coords(cls):
+        return cls.latitude, cls.longitude

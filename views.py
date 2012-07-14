@@ -81,16 +81,8 @@ def show_entries():
 
 @app.route('/distance/<coordinates>')
 def calculate_distance(coordinates):
-    lat, lng = [float(num) for num in coordinates.split(',')]
-    drange = 4 # Distance in Kilometers
-    haversine = """(3959 * acos(
-                            cos(radians(latitude)) * cos(radians( %(lat)f )) *
-                                cos( radians(%(lng)f) - radians(longitude) ) +
-                            sin(radians(latitude)) * sin(radians( %(lat)f ))
-                            )
-                    )""" % { 'lat': float(lat), 'lng': float(lng) }
-    query = "SELECT *, %(haversine)s AS distance FROM room " \
-            "HAVING distance <= %(drange)d ORDER BY distance" % {'drange': int(drange),
-                                                        'haversine': haversine}
-    rooms = db.engine.execute(query).fetchall()
-    return str(rooms)
+    coords = [float(num) for num in coordinates.split(',')]
+    drange = 3 # Distance in Kilometers
+    t = Room.distance_subquery(coords, drange)
+    rooms = db.session.query(Room, t.c.distance).filter(t.c.distance <= drange, Room.id == t.c.id).order_by(t.c.distance).all()
+    return 'Found %d room(s)<br/>' %len(rooms) + str(rooms)
