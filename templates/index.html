@@ -1,29 +1,39 @@
 {% extends "includes/layout.html" %}
-
 {% block content %}
-<div id="content">
-
-<p>A clean solution for advertising and locating houses for rent.
-</p>
-<p>
-We hope that this site will solve the following problems for users --
-</p>
-<ul>
-<li>Often, a person new to a city, doesn't know the geography of a city
-  and finds it difficult to look for houses in the close vicinity of
-  her workplace.
-</li>
-<li>Many of the houses listed as available are occupied long ago, but
-  nobody really bothers to update the websites.
-</li>
-<li>The description given by owners often paints a rosier picture than
-  reality.
-</li>
-<li>The contact workflow doesn't work well in many sites.
-</li>
-</ul>
-
-# FIXME: Think about what to show on the front page and change content above.
-</div>
-
+# FIXME: Think about what to show on the front page and change view ...
+<table class="listing">
+  <thead>
+    <tr>
+      <th class="num">#</th>
+      <th>Available</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>Starting</th>
+      <th>Type</th>
+      <th>Rent</th>
+    </tr>
+  </thead>
+  {% for room in rooms %}
+    <tbody class="link separator">
+      {%- set link=url_for('view_ad', url=room.urlname) -%}
+      <tr>
+        <td class="num">{{ loop.index }}</td>
+        <td>{{ room.is_available }}</td>
+        <td><a href="{{ link }}">{{ room.address }}</a></td>
+        <td>{{ room.city }}</a></td>
+        <td>{{ room.starting }}</a></td>
+        <td>{{ room.room_type }}</a></td>
+        <td>{{ room.room_rent }}</a></td>
+      </tr>
+    <tbody>
+  {% else %}
+    <tbody>
+      <tr>
+        <td colspan="9">
+          <em>(No ads have been posted)</em>
+        </td>
+      </tr>
+    </tbody>
+  {% endfor %}
+</table>
 {% endblock %}

@@ -22,7 +22,9 @@ lastuser.init_usermanager(UserManager(db, User))
 @app.route('/')
 def index():
     # FIXME: Think about what the index page should be like
-    return render_template('index.html', title='Tree House')
+    # FIXME: old ads shouldn't be shown
+    rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at')).filter(Room.dead==False).all()
+    return render_template('index.html', rooms=rooms)
 
 @app.route('/login')
 @lastuser.login_handler
@@ -57,6 +59,11 @@ def lastuser_error(error, error_description=None, error_uri=None):
 
 # --- Routes: ads ------------------------------------------------------------
 
+@app.route('/about')
+@lastuser.requires_login
+def about():
+    return render_template('about.html')
+
 @app.route('/new', methods=['GET', 'POST'])
 @lastuser.requires_login
 def post_ad():
@@ -70,16 +77,10 @@ def post_ad():
         room.occupieds = OccupiedSpace()
         db.session.add(room)
         db.session.commit()
-        return redirect(url_for('show_entries'))
+        return redirect(url_for('index'))
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
                             submit="Post ad")
-
-@app.route('/show_entries')
-@lastuser.requires_login
-def show_entries():
-    rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at')).all()
-    return render_template('show_entries.html', rooms=rooms)
 
 @app.route('/ad/<url>/edit', methods=['GET', 'POST'])
 @lastuser.requires_login
@@ -153,6 +154,7 @@ def delete_ad(url):
                 u"is permanent and cannot be undone." % (room.address, room.city))
 
 @app.route('/distance/<coordinates>')
+@lastuser.requires_login
 def calculate_distance(coordinates):
     coords = [float(num) for num in coordinates.split(',')]
     drange = 3 # Distance in Kilometers
