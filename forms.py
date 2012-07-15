@@ -45,3 +45,11 @@ class RoomForm(wtf.Form):
     room_description = wtf.TextAreaField('Description',
                     validators=[wtf.Required()],
                     description='Any additional description about the room.')
+
+class ConfirmActionForm(wtf.Form):
+    """
+    Confirm a delete operation
+    """
+    # The labels on these widgets are not used. See delete.html.
+    confirm = wtf.SubmitField(u"Confirm")
+    cancel = wtf.SubmitField(u"Cancel")

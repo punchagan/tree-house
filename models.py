@@ -36,6 +36,34 @@ class User(UserBase, db.Model):
     __tablename__ = 'user'
     description = db.Column(db.Text, default=u'', nullable=True)
 
+class OccupiedSpace(BaseMixin, db.Model):
+    __tablename__ = 'occupiedspace'
+    type = db.Column(db.Integer, nullable=True)
+    count = db.Column(db.Integer, default=0, nullable=False)
+
+    def __init__(self, **kwargs):
+        super(OccupiedSpace, self).__init__(**kwargs)
+        self.count = 0
+
+    def occupied(self, user):
+        occupiedob = Occupied.query.filter_by(user=user, space=self).first()
+        if not occupiedob:
+            occupiedob = Occupied(user=user, space=self)
+            self.count += 1
+            db.session.add(occupiedob)
+        return occupiedob
+
+class Occupied(BaseMixin, db.Model):
+    __tablename__ = 'occupied'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship(User, primaryjoin=user_id == User.id,
+        backref=db.backref('occupieds', cascade="all, delete-orphan"))
+    space_id = db.Column(db.Integer, db.ForeignKey('occupiedspace.id'), nullable=False)
+    space = db.relationship(OccupiedSpace, primaryjoin=space_id == OccupiedSpace.id,
+        backref=db.backref('occupieds', cascade="all, delete-orphan"))
+
+    __table_args__ = (db.UniqueConstraint("user_id", "space_id"), {})
+
 class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -47,6 +75,8 @@ class Room(BaseMixin, db.Model):
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
 
+    urlname = db.Column(db.Text, nullable=False)
+
     starting = db.Column(db.Date, nullable=False) # required/available starting from
     is_available = db.Column(db.Boolean, default=True, nullable=False) # available/required
 
@@ -54,6 +84,11 @@ class Room(BaseMixin, db.Model):
     room_rent = db.Column(db.Integer, default=0, nullable=False)
     room_pref = db.Column(db.Integer, default=ROOM_PREF.FAMILY, nullable=True)
     room_description = db.Column(db.Text, default=u'', nullable=False)
+
+    dead = db.Column(db.Boolean, default=False, nullable=False)
+
+    occupieds_id = db.Column(db.Integer, db.ForeignKey('occupiedspace.id'), nullable=False)
+    occupieds = db.relationship(OccupiedSpace, uselist=False)
 
     def __repr__(self):
         return '%(address)s, %(city)s, %(room_type)s, %(latitude)s, %(longitude)s' % self.__dict__
