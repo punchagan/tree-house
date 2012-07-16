@@ -77,7 +77,7 @@ def post_ad():
         room.occupieds = OccupiedSpace()
         db.session.add(room)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('view_ad', url=room.urlname))
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
                             submit="Post ad")
@@ -85,8 +85,24 @@ def post_ad():
 @app.route('/ad/<url>/edit', methods=['GET', 'POST'])
 @lastuser.requires_login
 def edit_ad(url):
-    # FIXME:
-    pass
+    room = Room.query.filter_by(urlname=url).first()
+    if not room and room.user == g.user:
+        abort(404)
+    if room.dead: # FIXME: add checks for older than 3 weeks
+        # FIXME: put a dead page?
+        abort(404)
+    form = RoomForm()
+    if request.method == 'GET':
+        form.process(obj=room)
+        form.email.data = g.user.email
+        print room.occupieds
+    elif form.validate_on_submit():
+        form.populate_obj(room)
+        db.session.commit()
+        return redirect(url_for('view_ad', url=room.urlname))
+    return render_template('autoform.html', form=form,
+                            title="Edit advertisement",
+                            submit="Save")
 
 @app.route('/ad/<url>', methods=['GET', 'POST'])
 @lastuser.requires_login
