@@ -147,6 +147,31 @@ def hide_ad(url):
     return render_template('confirm_action.html', form=form, title=u"Confirm occupied",
         message=message % (room.address, room.city))
 
+@app.route('/ad/<url>/available', methods=['GET', 'POST'])
+@lastuser.requires_login
+def unhide_ad(url):
+    room = Room.query.filter_by(urlname=url).first()
+    if not room or room.dead:
+        abort(404)
+    form = ConfirmActionForm()
+    if form.validate_on_submit():
+        if 'yes' in request.form:
+            if room.user == g.user:
+                room.occupieds = OccupiedSpace()
+                db.session.commit()
+                flash("Your ghosla has been un-marked as occupied", "info")
+            else:
+                abort(403)
+            return redirect(url_for('index'))
+        else:
+            return redirect(url_for('view_ad', url=url))
+    if room.user == g.user:
+        message = u"""Do you really wish to remove all occupied marks on your Ghosla '%s, %s'?
+            Please do this, only if your Ghosla is really unoccupied."""
+    return render_template('confirm_action.html', form=form, title=u"Confirm un-occupied",
+        message=message % (room.address, room.city))
+
+
 @app.route('/ad/<url>/delete', methods=['GET', 'POST'])
 @lastuser.requires_login
 def delete_ad(url):
