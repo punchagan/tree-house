@@ -23,6 +23,13 @@ class ROOM_PREF:
     STUDENTS = 3
     OTHERS = 4
 
+class COMMENTSTATUS:
+    PUBLIC = 0
+    SCREENED = 1
+    HIDDEN = 2
+    SPAM = 3
+    DELETED = 4  # For when there are children to be preserved
+
 # --- Mixins ------------------------------------------------------------------
 
 class BaseMixin(object):
@@ -38,7 +45,6 @@ class User(UserBase, db.Model):
 
 class OccupiedSpace(BaseMixin, db.Model):
     __tablename__ = 'occupiedspace'
-    type = db.Column(db.Integer, nullable=True)
     count = db.Column(db.Integer, default=0, nullable=False)
 
     def __init__(self, **kwargs):
@@ -63,6 +69,56 @@ class Occupied(BaseMixin, db.Model):
         backref=db.backref('occupieds', cascade="all, delete-orphan"))
 
     __table_args__ = (db.UniqueConstraint("user_id", "space_id"), {})
+
+class CommentSpace(BaseMixin, db.Model):
+    __tablename__ = 'commentspace'
+    count = db.Column(db.Integer, default=0, nullable=False)
+
+    def __init__(self, **kwargs):
+        super(CommentSpace, self).__init__(**kwargs)
+        self.count = 0
+
+
+class Comment(BaseMixin, db.Model):
+    __tablename__ = 'comment'
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user = db.relationship(User, primaryjoin=user_id == User.id,
+        backref=db.backref('comments', cascade="all"))
+    commentspace_id = db.Column(db.Integer, db.ForeignKey('commentspace.id'), nullable=False)
+    commentspace = db.relationship(CommentSpace, primaryjoin=commentspace_id == CommentSpace.id,
+        backref=db.backref('comments', cascade="all, delete-orphan"))
+
+    parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    children = db.relationship("Comment", backref=db.backref("parent", remote_side="Comment.id"))
+
+    message = db.Column(db.Text, nullable=False)
+
+    status = db.Column(db.Integer, default=0, nullable=False)
+
+    def delete(self):
+        """
+        Delete this comment.
+        """
+        if len(self.children) > 0:
+            self.status = COMMENTSTATUS.DELETED
+            self.user = None
+            self.message = ''
+        else:
+            if self.parent and self.parent.is_deleted:
+                # If the parent is deleted, ask it to reconsider removing itself
+                parent = self.parent
+                parent.children.remove(self)
+                db.session.delete(self)
+                parent.delete()
+            else:
+                db.session.delete(self)
+
+    @property
+    def is_deleted(self):
+        return self.status == COMMENTSTATUS.DELETED
+
+    def sorted_children(self):
+        return sorted(self.children, key=lambda child: child.votes.count)
 
 class Room(BaseMixin, db.Model):
     __tablename__ = 'room'
@@ -89,6 +145,15 @@ class Room(BaseMixin, db.Model):
 
     occupieds_id = db.Column(db.Integer, db.ForeignKey('occupiedspace.id'), nullable=False)
     occupieds = db.relationship(OccupiedSpace, uselist=False)
+
+    comments_id = db.Column(db.Integer, db.ForeignKey('commentspace.id'), nullable=False)
+    comments = db.relationship(CommentSpace, uselist=False)
+
+    def __init__(self, **kwargs):
+        super(Room, self).__init__(**kwargs)
+        self.occupieds = OccupiedSpace()
+        self.comments = CommentSpace()
+
 
     def __repr__(self):
         return '%(address)s, %(city)s, %(room_type)s, %(latitude)s, %(longitude)s' % self.__dict__

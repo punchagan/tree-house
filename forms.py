@@ -46,6 +46,14 @@ class RoomForm(wtf.Form):
                     validators=[wtf.Required()],
                     description='Any additional description about the room.')
 
+class CommentForm(wtf.Form):
+    parent_id = wtf.HiddenField('Parent', default="", id="comment_parent_id")
+    edit_id = wtf.HiddenField('Edit', default="", id="comment_edit_id")
+    message = wtf.TextAreaField('Add comment', id="comment_message", validators=[wtf.Required()])
+
+class DeleteCommentForm(wtf.Form):
+    comment_id = wtf.HiddenField('Comment', validators=[wtf.Required()])
+
 class ConfirmActionForm(wtf.Form):
     """
     Confirm a delete operation

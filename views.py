@@ -2,6 +2,7 @@
 
 # Standard libary imports
 from uuid import uuid4
+from datetime import datetime
 
 # Hasgeek imports
 from flask import render_template, flash, redirect, url_for, g, request, abort
@@ -11,8 +12,8 @@ from coaster.views import get_next_url
 
 # Local imports
 from app import app
-from forms import RoomForm, ConfirmActionForm
-from models import db, User, Room, OccupiedSpace
+from forms import RoomForm, ConfirmActionForm, CommentForm, DeleteCommentForm
+from models import db, User, Room, OccupiedSpace, Comment
 
 lastuser = LastUser(app)
 lastuser.init_usermanager(UserManager(db, User))
@@ -74,7 +75,6 @@ def post_ad():
         room = Room(user=g.user)
         form.populate_obj(room)
         room.urlname = str(uuid4())[:8]
-        room.occupieds = OccupiedSpace()
         db.session.add(room)
         db.session.commit()
         return redirect(url_for('view_ad', url=room.urlname))
@@ -111,11 +111,52 @@ def view_ad(url):
     if not room:
         abort(404)
     if room.dead: # FIXME: add checks for older than 3 weeks
-        # FIXME: put a dead page?
         abort(404)
-    # FIXME: Add comment field
     # URL is okay. Show the proposal.
-    return render_template('room.html', room=room)
+    comments = Comment.query.filter_by(commentspace=room.comments, parent=None).order_by('created_at').all()
+    commentform = CommentForm()
+    delcommentform = DeleteCommentForm()
+    if request.method == 'POST':
+        if request.form.get('form.id') == 'newcomment' and commentform.validate():
+            if commentform.edit_id.data:
+                comment = Comment.query.get(int(commentform.edit_id.data))
+                if comment:
+                    if comment.user == g.user:
+                        comment.message = commentform.message.data
+                        flash("Your comment has been edited", "info")
+                    else:
+                        flash("You can only edit your own comments", "info")
+                else:
+                    flash("No such comment", "error")
+            else:
+                comment = Comment(user=g.user, commentspace=room.comments, message=commentform.message.data)
+                if commentform.parent_id.data:
+                    parent = Comment.query.get(int(commentform.parent_id.data))
+                    if parent and parent.commentspace == room.comments:
+                        comment.parent = parent
+                room.comments.count += 1
+                db.session.add(comment)
+                flash("Your comment has been posted", "info")
+            db.session.commit()
+            # Redirect despite this being the same page because HTTP 303 is required to not break
+            # the browser Back button
+            return redirect(url_for('view_ad', url=room.urlname) + "#c" + str(comment.id),
+                code=303)
+        elif request.form.get('form.id') == 'delcomment' and delcommentform.validate():
+            comment = Comment.query.get(int(delcommentform.comment_id.data))
+            if comment:
+                if comment.user == g.user:
+                    comment.delete()
+                    room.comments.count -= 1
+                    db.session.commit()
+                    flash("Your comment was deleted.", "info")
+                else:
+                    flash("You did not post that comment.", "error")
+            else:
+                flash("No such comment.", "error")
+            return redirect(url_for('view_ad', url=room.urlname), code=303)
+    return render_template('room.html', room=room, comments=comments,
+                        commentform=commentform, delcommentform=delcommentform)
 
 @app.route('/ad/<url>/taken', methods=['GET', 'POST'])
 @lastuser.requires_login
@@ -139,8 +180,8 @@ def hide_ad(url):
             return redirect(url_for('view_ad', url=url))
     if room.user == g.user:
         message = u"""Do you really wish to mark your Ghosla '%s, %s' as occupied?
-                This will remove all votes and comments as well. This operation
-                is permanent and cannot be undone."""
+                This will remove all comments as well. This operation is permanent
+                and cannot be undone."""
     else:
         message = u"""Are you sure you want to mark '%s, %s' as occupied? Please
                do so, only if you have contacted the ad poster and confirmed."""
@@ -191,7 +232,7 @@ def delete_ad(url):
             return redirect(url_for('view_ad', url=url))
     return render_template('confirm_action.html', form=form, title=u"Confirm delete",
         message=u"Do you really wish to delete your ad for '%s, %s'? "
-                u"This will remove all votes and comments as well. This operation "
+                u"This will remove all comments as well. This operation "
                 u"is permanent and cannot be undone." % (room.address, room.city))
 
 @app.route('/distance/<coordinates>')
@@ -202,3 +243,26 @@ def calculate_distance(coordinates):
     t = Room.distance_subquery(coords, drange)
     rooms = db.session.query(Room, t.c.distance).filter(t.c.distance <= drange, Room.id == t.c.id).order_by(t.c.distance).all()
     return 'Found %d room(s)<br/>' %len(rooms) + str(rooms)
+
+@app.template_filter('age')
+def age(dt):
+    suffix = u"ago"
+    delta = datetime.utcnow() - dt
+    if delta.days == 0:
+        # < 1 day
+        if delta.seconds < 10:
+            return "seconds %s" % suffix
+        elif delta.seconds < 60:
+            return "%d seconds %s" % (delta.seconds, suffix)
+        elif delta.seconds < 120:
+            return "a minute %s" % suffix
+        elif delta.seconds < 3600:  # < 1 hour
+            return "%d minutes %s" % (int(delta.seconds / 60), suffix)
+        elif delta.seconds < 7200:  # < 2 hours
+            return "an hour %s" % suffix
+        else:
+            return "%d hours %s" % (int(delta.seconds / 3600), suffix)
+    elif delta.days == 1:
+        return u"a day %s" % suffix
+    else:
+        return u"%d days %s" % (delta.days, suffix)

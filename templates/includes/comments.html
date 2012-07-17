@@ -1,0 +1,41 @@
+{% macro commenttree(comments, document, currentuser, documenturl) %}
+{%- for comment in comments %}
+  <li class="comment">
+    <div id="c{{ comment.id }}">
+      <div class="com-header">
+        <a class="collapse" href="#">[-]</a><a class="uncollapse hidden" href="#">[+]</a>
+        {% if comment.is_deleted -%}
+          <span class="commenter">[deleted]</span>
+        {%- else -%}
+          <span class="commenter {%- if comment.user == document.user %} selected{% endif %}">{{ comment.user.fullname }}</span>
+          {{ comment.created_at|age }}
+          {%- if comment.edited_at %}
+            (edited {{ comment.edited_at|age }})
+          {%- endif %}
+        {%- endif %}
+      </div>
+      <div class="com-body">
+        {% if not comment.is_deleted -%}
+          {{ comment.message|safe }}
+        {%- endif %}
+        <div data-id="{{ comment.id }}" class="com-footer">
+          {% if not comment.is_deleted %}
+            <a title="Reply" class="comment-reply" href="#c{{ comment.id }}">[reply]</a>
+            {% if comment.user == currentuser -%}
+              <a title="Edit" class="comment-edit" href="#c{{ comment.id }}">[edit]</a>
+              <a title="Delete" class="comment-delete" href="#c{{ comment.id }}">[delete]</a>
+            {%- endif %}
+          {%- endif %}
+          <a title="Permalink" class="comment-permalink" href="#c{{ comment.id }}">[link]</a>
+          {% if comment.parent %}<a title="Parent" class="comment-parent" href="#c{{ comment.parent.id }}">[parent]</a>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% if comment.children %}
+      <ul class="com-children">
+        {{ commenttree(comment.sorted_children(), document, currentuser, documenturl) }}
+      </ul>
+    {% endif %}
+  </li>
+{% endfor -%}
+{% endmacro %}
