@@ -9,8 +9,8 @@
         {%- else -%}
           <span class="commenter {%- if comment.user == document.user %} selected{% endif %}">{{ comment.user.fullname }}</span>
           {{ comment.created_at|age }}
-          {%- if comment.edited_at %}
-            (edited {{ comment.edited_at|age }})
+          {%- if comment.updated_at %}
+            (edited {{ comment.updated_at|age }})
           {%- endif %}
         {%- endif %}
       </div>

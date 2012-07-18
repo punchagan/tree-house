@@ -247,7 +247,7 @@ def calculate_distance(coordinates):
 @app.template_filter('age')
 def age(dt):
     suffix = u"ago"
-    delta = datetime.utcnow() - dt
+    delta = datetime.now() - dt
     if delta.days == 0:
         # < 1 day
         if delta.seconds < 10:
