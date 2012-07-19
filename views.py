@@ -2,7 +2,7 @@
 
 # Standard libary imports
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Hasgeek imports
 from flask import render_template, flash, redirect, url_for, g, request, abort
@@ -13,18 +13,22 @@ from coaster.views import get_next_url
 # Local imports
 from app import app
 from forms import RoomForm, ConfirmActionForm, CommentForm, DeleteCommentForm
-from models import db, User, Room, OccupiedSpace, Comment
+from models import db, User, Room, OccupiedSpace, Comment, Occupied
+from util import get_days_ago
 
 lastuser = LastUser(app)
 lastuser.init_usermanager(UserManager(db, User))
+OLD_DAYS = timedelta(21)
+OCCUPIED_DAYS = timedelta(2)
 
 # --- Routes: --------------------------------------------------------------
 
 @app.route('/')
 def index():
     # FIXME: Think about what the index page should be like
-    # FIXME: old ads shouldn't be shown
-    rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at')).filter(Room.dead==False).all()
+    all_rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at'))
+    now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
+    rooms = all_rooms.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS).filter(db.func.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at))).all()
     return render_template('index.html', rooms=rooms)
 
 @app.route('/login')
@@ -88,8 +92,10 @@ def edit_ad(url):
     room = Room.query.filter_by(urlname=url).first()
     if not room and room.user == g.user:
         abort(404)
-    if room.dead: # FIXME: add checks for older than 3 weeks
-        # FIXME: put a dead page?
+    if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
+        abort(404)
+    occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
+    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = RoomForm()
     if request.method == 'GET':
@@ -110,7 +116,11 @@ def view_ad(url):
     room = Room.query.filter_by(urlname=url).first()
     if not room:
         abort(404)
-    if room.dead: # FIXME: add checks for older than 3 weeks
+    print get_days_ago(room.created_at) > OLD_DAYS.days, get_days_ago(room.created_at), OLD_DAYS.days
+    if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
+        abort(404)
+    occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
+    if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     # URL is okay. Show the proposal.
     comments = Comment.query.filter_by(commentspace=room.comments, parent=None).order_by('created_at').all()
@@ -164,6 +174,11 @@ def hide_ad(url):
     room = Room.query.filter_by(urlname=url).first()
     if not room:
         abort(404)
+    if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
+        abort(404)
+    occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
+    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
+        abort(404)
     form = ConfirmActionForm()
     if form.validate_on_submit():
         if 'yes' in request.form:
@@ -192,7 +207,12 @@ def hide_ad(url):
 @lastuser.requires_login
 def unhide_ad(url):
     room = Room.query.filter_by(urlname=url).first()
-    if not room or room.dead:
+    if not room:
+        abort(404)
+    if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
+        abort(404)
+    occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
+    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = ConfirmActionForm()
     if form.validate_on_submit():
@@ -221,11 +241,16 @@ def delete_ad(url):
         abort(404)
     if not lastuser.has_permission('siteadmin') and room.user != g.user:
         abort(403)
+    if room.dead: # We let people delete old ads... no check for age, occupied
+        abort(404)
     form = ConfirmActionForm()
     if form.validate_on_submit():
         if 'yes' in request.form:
-            db.session.delete(room)
-            db.session.commit()
+            if len(room.comments.comments) > 0:
+                room.dead = True
+            else:
+                db.session.delete(room)
+                db.session.commit()
             flash("Your ad has been deleted", "info")
             return redirect(url_for('index'))
         else:
