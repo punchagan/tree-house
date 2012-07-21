@@ -14,7 +14,7 @@ from coaster.views import get_next_url
 from app import app
 from forms import RoomForm, ConfirmActionForm, CommentForm, DeleteCommentForm
 from models import db, User, Room, OccupiedSpace, Comment, Occupied
-from util import get_days_ago
+from utils import get_days_ago
 
 lastuser = LastUser(app)
 lastuser.init_usermanager(UserManager(db, User))
