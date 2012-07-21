@@ -26,6 +26,8 @@ OCCUPIED_DAYS = timedelta(2)
 @app.route('/')
 def index():
     # FIXME: Think about what the index page should be like
+    if not g.user:
+        return render_template('about.html')
     all_rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at'))
     now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
     rooms = all_rooms.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS).filter(db.func.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at))).all()
@@ -65,7 +67,6 @@ def lastuser_error(error, error_description=None, error_uri=None):
 # --- Routes: ads ------------------------------------------------------------
 
 @app.route('/about')
-@lastuser.requires_login
 def about():
     return render_template('about.html')
 
@@ -259,6 +260,10 @@ def delete_ad(url):
         message=u"Do you really wish to delete your ad for '%s, %s'? "
                 u"This will remove all comments as well. This operation "
                 u"is permanent and cannot be undone." % (room.address, room.city))
+
+@app.route('/contact')
+def contact():
+    return 'Coming soon!'
 
 @app.route('/distance/<coordinates>')
 @lastuser.requires_login
