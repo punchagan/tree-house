@@ -1,0 +1,28 @@
+#+TITLE: Tree House
+
+* About
+  This is an experimental project to build a "clean and simple" site
+  where people can advertise and search for rented rooms/houses in a
+  specified region of interest.
+* Motivation
+  Searching for accommodation in cities like Bangalore and Bombay is a
+  big pain, and we have experienced it many a time.  The idea of
+  building a clean site for the same has been brewing in my head for a
+  long time, and finally I found some collaborators to work on this!
+
+  We hope that this site will solve the following problems --
+  - Often, a person new to a city, doesn't know it's geography and
+    finds it difficult to look for houses in the close vicinity of
+    her workplace.
+  - Many of the houses listed as available are occupied, but nobody
+    really bothers to update the websites.
+  - The description given by owners often paints a rosier picture than
+    reality.
+  - The contact work-flow doesn't work well in many sites, requiring
+    new login credentials for each site, lots of spam email of ads
+    that aren't very relevant, non-responsive advertisers, etc.
+* License
+  The code in this project is licensed under the 3-clause BSD License.
+* Acknowledgments
+  - Uses twitter [[http://getbootstrap.com][bootstrap]] for the cool looks!
+  - Re-uses a lot of code from HasGeek's [[http://github.com/hasgeek][funnel]] project
