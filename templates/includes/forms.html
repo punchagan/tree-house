@@ -27,8 +27,8 @@
 
 {% macro rendersubmit(buttons=[], css_class="") %}
 <div class="field{% if css_class %} {{ css_class}}{% endif %}">
-  <div class="label submit">&nbsp;</div>
-  <div class="control submit">
+  <div class="submit">&nbsp;</div>
+  <div class="controls submit">
     {% for name, value, widget_class in buttons %}
       <input type="submit"
         {%- if name %} name="{{ name|e }}"{% else %} {% endif -%}
@@ -43,7 +43,7 @@
 
 {% macro renderform(form, formid, submit, message='', form_cls='form-horizontal') %}
 <div class="span12">
-<form id="{{ formid }}" class="{{ form_cls }}" method="POST" accept-charset="UTF-16">
+<form id="{{ formid }}" class="{{ form_cls }}" method="POST" accept-charset="UTF-8">
 <fieldset>
   {% if message %}<p>{{ message }}</p>{% endif %}
   <div style="display:none;"><input type="hidden" name="form.id" value="{{ formid }}" /></div>
@@ -55,7 +55,11 @@
     {% if field.widget.input_type and field.widget.input_type == 'hidden' -%}
     {# Don't show hidden #}
     {%- else -%}
-    {{ renderfield(field, "small") }}
+      {% if field.type == "RadioField" %}
+        {{ renderfield(field, "small", "unstyled") }}
+      {% else %}
+        {{ renderfield(field, "small") }}
+      {% endif %}
     {%- endif %}
   {% endfor %}
   {{ rendersubmit([(None, submit or "Submit", None)], "small") }}

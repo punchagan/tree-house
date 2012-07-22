@@ -2,3 +2,7 @@ body {
     padding-top: 60px;
     padding-bottom: 40px;
 }
+
+ input[type="radio"] {
+    vertical-align: baseline;
+}

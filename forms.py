@@ -17,7 +17,8 @@ class RoomForm(wtf.Form):
     latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
     longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
 
-    is_available = wtf.BooleanField('Available or Wanted?')
+    is_available = wtf.BooleanField('Available or Wanted?',
+        description="Check this box if you have a Ghosla and are looking for tenants.")
 
     starting = wtf.DateField('Available/Required from',
                              description="Enter a date in yyyy-mm-dd format.",
