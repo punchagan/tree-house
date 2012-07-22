@@ -41,9 +41,10 @@
 </div>
 {% endmacro %}
 
-{% macro renderform(form, formid, submit, message='') %}
+{% macro renderform(form, formid, submit, message='', form_cls='form-horizontal') %}
 <div class="span12">
-<form id="{{ formid }}" method="POST" accept-charset="UTF-8">
+<form id="{{ formid }}" class="{{ form_cls }}" method="POST" accept-charset="UTF-16">
+<fieldset>
   {% if message %}<p>{{ message }}</p>{% endif %}
   <div style="display:none;"><input type="hidden" name="form.id" value="{{ formid }}" /></div>
   {{ form.hidden_tag() }}
@@ -58,6 +59,7 @@
     {%- endif %}
   {% endfor %}
   {{ rendersubmit([(None, submit or "Submit", None)], "small") }}
+</fieldset>
 </form>
 </div>
 {% endmacro %}
