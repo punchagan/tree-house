@@ -135,11 +135,11 @@ def view_ad(url):
                 if comment:
                     if comment.user == g.user:
                         comment.message = commentform.message.data
-                        flash("Your comment has been edited", "info")
+                        flash("Your comment has been edited", category="info")
                     else:
-                        flash("You can only edit your own comments", "info")
+                        flash("You can only edit your own comments", category="info")
                 else:
-                    flash("No such comment", "error")
+                    flash("No such comment", category="error")
             else:
                 comment = Comment(user=g.user, commentspace=room.comments, message=commentform.message.data)
                 if commentform.parent_id.data:
@@ -148,7 +148,7 @@ def view_ad(url):
                         comment.parent = parent
                 room.comments.count += 1
                 db.session.add(comment)
-                flash("Your comment has been posted", "info")
+                flash("Your comment has been posted", category="success")
             db.session.commit()
             # Redirect despite this being the same page because HTTP 303 is required to not break
             # the browser Back button
@@ -161,11 +161,11 @@ def view_ad(url):
                     comment.delete()
                     room.comments.count -= 1
                     db.session.commit()
-                    flash("Your comment was deleted.", "info")
+                    flash("Your comment was deleted.", category="success")
                 else:
-                    flash("You did not post that comment.", "error")
+                    flash("You did not post that comment.", category="error")
             else:
-                flash("No such comment.", "error")
+                flash("No such comment.", category="error")
             return redirect(url_for('view_ad', url=room.urlname), code=303)
     return render_template('room.html', room=room, comments=comments,
                         commentform=commentform, delcommentform=delcommentform)
@@ -187,11 +187,11 @@ def hide_ad(url):
             if room.user == g.user:
                 room.dead = True
                 db.session.commit()
-                flash("Your ghosla has been marked occupied", "info")
+                flash("Your ghosla has been marked occupied", category="success")
             else:
                 room.occupieds.occupied(g.user)
                 db.session.commit()
-                flash("The ghosla has been marked occupied", "info")
+                flash("The ghosla has been marked occupied", category="success")
             return redirect(url_for('index'))
         else:
             return redirect(url_for('view_ad', url=url))
@@ -222,7 +222,7 @@ def unhide_ad(url):
             if room.user == g.user:
                 room.occupieds = OccupiedSpace()
                 db.session.commit()
-                flash("Your ghosla has been un-marked as occupied", "info")
+                flash("Your ghosla has been un-marked as occupied", category="success")
             else:
                 abort(403)
             return redirect(url_for('index'))
@@ -253,7 +253,7 @@ def delete_ad(url):
             else:
                 db.session.delete(room)
                 db.session.commit()
-            flash("Your ad has been deleted", "info")
+            flash("Your ad has been deleted", category="success")
             return redirect(url_for('index'))
         else:
             return redirect(url_for('view_ad', url=url))

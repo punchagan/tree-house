@@ -59,7 +59,10 @@
 
   {% block flash_messages %}
     {% for message in get_flashed_messages() %}
-      <div class=flash>{{ message }}</div>
+      <div class="alert alert-{{ message.category }}">
+        <a class="close" data-dismiss="alert" href="#">×</a>
+        {{ message }}
+      </div>
     {% endfor %}
   {% endblock %}
 
