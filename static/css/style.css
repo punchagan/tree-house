@@ -3,6 +3,10 @@ body {
     padding-bottom: 40px;
 }
 
- input[type="radio"] {
+input[type="radio"] {
     vertical-align: baseline;
+}
+
+.control-group .controls label {
+    display: inline;
 }
