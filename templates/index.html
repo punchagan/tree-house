@@ -1,39 +1,30 @@
 {% extends "includes/layout.html" %}
 {% block content %}
-# FIXME: Think about what to show on the front page and change view ...
-<table class="listing">
-  <thead>
-    <tr>
-      <th class="num">#</th>
-      <th>Available</th>
-      <th>Address</th>
-      <th>City</th>
-      <th>Starting</th>
-      <th>Type</th>
-      <th>Rent</th>
-    </tr>
-  </thead>
-  {% for room in rooms %}
-    <tbody class="link separator">
-      {%- set link=url_for('view_ad', url=room.urlname) -%}
-      <tr>
-        <td class="num">{{ loop.index }}</td>
-        <td>{{ room.is_available }}</td>
-        <td><a href="{{ link }}">{{ room.address }}</a></td>
-        <td>{{ room.city }}</a></td>
-        <td>{{ room.starting }}</a></td>
-        <td>{{ room.room_type }}</a></td>
-        <td>{{ room.room_rent }}</a></td>
-      </tr>
-    <tbody>
-  {% else %}
-    <tbody>
-      <tr>
-        <td colspan="9">
-          <em>(No ads have been posted)</em>
-        </td>
-      </tr>
-    </tbody>
-  {% endfor %}
-</table>
+{% for room in rooms %}
+<div class="row">
+  <div class="span2">
+    #FIXME: Show a gravatar of user here?
+  </div>
+  <div class="span6">
+    {%- set link=url_for('view_ad', url=room.urlname) -%}
+    <address>
+      {{ room.address }} <br/>
+      {{ room.city }}
+    </address>
+    <ul class="unstyled">
+      <li class="num">{{ loop.index }}</li>
+      <li>{{ room.is_available }}</li>
+      <li>{{ room.starting }}</li>
+      <li>{{ room.room_type }}</li>
+      <li>{{ room.room_rent }}</li>
+    </ul>
+  </div>
+  <div class="span4">
+    {{ room.room_description }}
+  </div>
+</div>
+{% else %}
+<!-- FIXME -->
+No Ads!
+{% endfor %}
 {% endblock %}

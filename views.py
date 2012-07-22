@@ -83,7 +83,7 @@ def post_ad():
         db.session.add(room)
         db.session.commit()
         return redirect(url_for('view_ad', url=room.urlname))
-    return render_template('autoform.html', form=form,
+    return render_template('autoform.html', form=form, formid="form-horizontal",
                             title="Post a new advertisement",
                             submit="Post ad")
 
