@@ -1,11 +1,11 @@
 {% extends "includes/layout.html" %}
 {% block content %}
 {% for room in rooms %}
-<div class="row">
+<div class="row show-ad">
   <div class="span2">
     <img src="{{ room.user.email | gravatar }}" />
   </div>
-  <div class="span6">
+  <div class="span5">
     {%- set link=url_for('view_ad', url=room.urlname) -%}
     <address>
       {{ room.address }} <br/>
@@ -19,7 +19,7 @@
       <li>{{ room.room_rent }}</li>
     </ul>
   </div>
-  <div class="span4">
+  <div class="span3">
     {{ room.room_description }}
   </div>
 </div>

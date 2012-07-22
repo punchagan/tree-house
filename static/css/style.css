@@ -10,3 +10,9 @@ input[type="radio"] {
 .control-group .controls label {
     display: inline;
 }
+
+.show-ad {
+    border: solid 1px lightgrey;
+    margin: 1px;
+    padding: 1px;
+}
