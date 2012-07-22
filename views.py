@@ -3,6 +3,7 @@
 # Standard libary imports
 from uuid import uuid4
 from datetime import datetime, timedelta
+from hashlib import md5
 
 # Hasgeek imports
 from flask import render_template, flash, redirect, url_for, g, request, abort
@@ -296,3 +297,9 @@ def age(dt):
         return u"a day %s" % suffix
     else:
         return u"%d days %s" % (delta.days, suffix)
+
+@app.template_filter('gravatar')
+def gravatar(email, size=100, style='wavatar'):
+    email_hash = md5(email.lower()).hexdigest()
+    gravatar_url = "http://www.gravatar.com/avatar/%s?d=%s&s=%d" %(email_hash, style, size)
+    return gravatar_url

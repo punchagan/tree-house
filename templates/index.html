@@ -3,7 +3,7 @@
 {% for room in rooms %}
 <div class="row">
   <div class="span2">
-    #FIXME: Show a gravatar of user here?
+    <img src="{{ room.user.email | gravatar }}" />
   </div>
   <div class="span6">
     {%- set link=url_for('view_ad', url=room.urlname) -%}

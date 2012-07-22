@@ -27,7 +27,7 @@
           <div class="btn-group pull-right">
             {% if g.user -%}
               <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                <i class="icon-user"></i> {{ g.user.fullname }}
+                <img src="{{ g.user.email | gravatar(size=24) }}" /> {{ g.user.fullname }}
                 <span class="caret"></span>
               </a>
               <ul class="dropdown-menu">
