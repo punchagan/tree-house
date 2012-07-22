@@ -1,6 +1,6 @@
 $(document).ready( function () {
-  var fetch = $('<a>').attr('id', 'fetch-button').attr('class', 'btn btn-primary').text('Fetch Co-ordinates')
-    .click(address_to_coordinates);
+  var fetch = $('<a>').attr('id', 'fetch-button').attr('class', 'btn btn-primary btn-small')
+    .text('Fetch Co-ordinates').click(address_to_coordinates);
   // FIXME: Add a spinner kinda thing, when geocoding is happening...
   $(fetch).appendTo($('#field-city .controls'));
   var note = "Enter address & click Fetch co-ordinates";
