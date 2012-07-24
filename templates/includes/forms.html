@@ -6,6 +6,9 @@
     </div>
   {% endfor %}
 {% endif %}
+{% if field.flags.is_date %} 
+  {% set widget_css_class = widget_css_class + " date-field" if widget_css_class else "date-field"%} 
+{% endif %}
 <div class="control-group" id="field-{{ field.id }}">
   <label class="control-label">{{ field.label.text }}</label>
   <div class="controls">

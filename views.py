@@ -75,6 +75,7 @@ def about():
 @lastuser.requires_login
 def post_ad():
     form = RoomForm()
+    form.starting.flags.is_date = True
     if request.method == 'GET':
         form.email.data = g.user.email
     if form.validate_on_submit():
@@ -100,6 +101,7 @@ def edit_ad(url):
     if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = RoomForm()
+    form.starting.flags.is_date = True
     if request.method == 'GET':
         form.process(obj=room)
         form.email.data = g.user.email
