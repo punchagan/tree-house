@@ -16,3 +16,7 @@ input[type="radio"] {
     margin: 1px;
     padding: 1px;
 }
+
+.show-ad .created, .show-ad .rent {
+    float: right;
+}

@@ -303,3 +303,7 @@ def gravatar(email, size=100, style='wavatar'):
     email_hash = md5(email.lower()).hexdigest()
     gravatar_url = "http://www.gravatar.com/avatar/%s?d=%s&s=%d" %(email_hash, style, size)
     return gravatar_url
+
+@app.template_filter('datetimeformat')
+def datetime_format(date, output_fmt='%d %b'):
+    return date.strftime(output_fmt)

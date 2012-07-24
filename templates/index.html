@@ -5,18 +5,27 @@
   <div class="span2">
     <img src="{{ room.user.email | gravatar }}" />
   </div>
-  <div class="span5">
+  <div class="span5{% if room.is_available %} available{% endif %}">
     {%- set link=url_for('view_ad', url=room.urlname) -%}
+    <a href="{{ url_for('view_ad', url=room.urlname) }}" class="created">{{ room.created_at | datetimeformat}}</a>
+    <address>
+      {{ room.city }} <br/>
+    </address>
     <address>
       {{ room.address }} <br/>
-      {{ room.city }}
     </address>
+    <span class="rent">Rs. {{ room.room_rent }}</span>
     <ul class="unstyled">
-      <li class="num">{{ loop.index }}</li>
-      <li>{{ room.is_available }}</li>
-      <li>{{ room.starting }}</li>
-      <li>{{ room.room_type }}</li>
-      <li>{{ room.room_rent }}</li>
+      <li>
+        <span class="starting">{% if room.is_available %}
+          Available
+          {% else %}
+          Required
+          {% endif %}
+          from: {{ room.starting }}</span>
+      </li>
+      <!-- FIXME -->
+      <li>Type: <span class="type">{{ room.room_type }}</span></li>
     </ul>
   </div>
   <div class="span3">
