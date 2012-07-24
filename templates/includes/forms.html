@@ -1,6 +1,10 @@
 {% macro renderfield(field, css_class="", widget_css_class=None, autofocus=False, nolabeldesc=False, sidetext=None) -%}
 {% if field.errors -%}
-  {% for error in field.errors %}<div class="alert alert-error">{{ error }}</div>{% endfor %}
+  {% for error in field.errors %}
+    <div class="row">
+    <div class="span2 alert alert-error">{{ error }}</div>
+    </div>
+  {% endfor %}
 {% endif %}
 <div class="control-group" id="field-{{ field.id }}">
   <label class="control-label">{{ field.label.text }}</label>
