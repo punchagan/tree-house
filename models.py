@@ -130,6 +130,7 @@ class Room(BaseMixin, db.Model):
     city = db.Column(db.Text, default=u'', nullable=False) # Can reduce query time for distances
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+    radius = db.Column(db.Float)
 
     urlname = db.Column(db.Text, nullable=False)
 

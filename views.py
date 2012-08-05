@@ -16,6 +16,7 @@ from app import app
 from forms import RoomForm, ConfirmActionForm, CommentForm, DeleteCommentForm
 from models import db, User, Room, OccupiedSpace, Comment, Occupied
 from utils import get_days_ago
+from mailclient import send_email_found_person, send_email_found_room
 
 lastuser = LastUser(app)
 lastuser.init_usermanager(UserManager(db, User))
@@ -84,6 +85,31 @@ def post_ad():
         room.urlname = str(uuid4())[:8]
         db.session.add(room)
         db.session.commit()
+        # FIXME: this won't work for notifications, if users are allowed to
+        # choose arbitrary distances? We begin with a fixed distance, and
+        # later We can have an enum of distances and search for all possible
+        # drange values and send notifications as required.
+        coords = form.latitude.data, form.longitude.data
+        # FIXME: Rooms is a REALLY BAD NAME!  It should be ads or posts or ...
+        # Search for rooms/ads that are in ROI and have opposite is_available flag
+
+        # FIXME: Add filters for other parameters as well. Distance is not the
+        # only thing! Need to decide what the other paramerters are.
+
+        if room.is_available: # ad poster is looking for a person...
+            t = Room.distance_subquery(coords, Room.radius)
+            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= Room.radius, Room.id == t.c.id).filter(Room.is_available != form.is_available.data).order_by(t.c.distance).all()
+        else: # ad poster is looking for a room...
+            t = Room.distance_subquery(coords, room.radius)
+            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= room.radius, Room.id == t.c.id).filter(Room.is_available != form.is_available.data).order_by(t.c.distance).all()
+        for r, distance in rooms_distance:
+            if room.is_available: # ad poster is looking for a person
+                send_email_found_room(r.user, room, distance)
+            else: # ad poster is looking for a room.
+                send_email_found_person(r.user, room, distance)
+            # FIXME: User should also be redirected to list of all available
+            # rooms meeting criteria, or all users meeting  criteria...
+            # because emails will be sent only for 'new' users/rooms.
         return redirect(url_for('view_ad', url=room.urlname))
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
@@ -105,7 +131,6 @@ def edit_ad(url):
     if request.method == 'GET':
         form.process(obj=room)
         form.email.data = g.user.email
-        print room.occupieds
     elif form.validate_on_submit():
         form.populate_obj(room)
         db.session.commit()
@@ -120,7 +145,6 @@ def view_ad(url):
     room = Room.query.filter_by(urlname=url).first()
     if not room:
         abort(404)
-    print get_days_ago(room.created_at) > OLD_DAYS.days, get_days_ago(room.created_at), OLD_DAYS.days
     if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
         abort(404)
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()

@@ -2,6 +2,9 @@
 
 import flask.ext.wtf as wtf
 
+# FIXME: It is "clear", we need two different forms (or js modified forms) for
+# the two different kinds of ads
+
 class RoomForm(wtf.Form):
     # FIXME: may be required when using lastuser, since email maynot be available
     email = wtf.html5.EmailField('Your email address',
@@ -16,6 +19,7 @@ class RoomForm(wtf.Form):
     # These fields will become readonly, thanks to js.
     latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
     longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
+    radius = wtf.FloatField('Radius of ROI')
 
     is_available = wtf.BooleanField('Available or Wanted?',
         description="Check this box if you have a Ghosla and are looking for tenants.")
@@ -46,6 +50,7 @@ class RoomForm(wtf.Form):
     room_description = wtf.TextAreaField('Description',
                     validators=[wtf.Required()],
                     description='Any additional description about the room.')
+
 
 class CommentForm(wtf.Form):
     parent_id = wtf.HiddenField('Parent', default="", id="comment_parent_id")
