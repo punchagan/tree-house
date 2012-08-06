@@ -85,10 +85,7 @@ def post_ad():
         room.urlname = str(uuid4())[:8]
         db.session.add(room)
         db.session.commit()
-        # FIXME: this won't work for notifications, if users are allowed to
-        # choose arbitrary distances? We begin with a fixed distance, and
-        # later We can have an enum of distances and search for all possible
-        # drange values and send notifications as required.
+
         coords = form.latitude.data, form.longitude.data
         # FIXME: Rooms is a REALLY BAD NAME!  It should be ads or posts or ...
         # Search for rooms/ads that are in ROI and have opposite is_available flag
