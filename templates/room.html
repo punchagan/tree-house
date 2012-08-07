@@ -28,6 +28,11 @@ FIXME: this page needs to get a better structure, but later.
     </tr>
   <tbody>
 </table>
+<div id="map_container">
+{%- set gmap="http://maps.googleapis.com/maps/api/staticmap?zoom=15&size=450x450&sensor=false&" -%}
+{%- set coords="%s,%s" %(room.latitude, room.longitude) %}
+<img src="{{ gmap }}center={{ coords }}&markers=color:blue|label:A|{{ coords }}" />
+</div>
     {% if comments %}
       <ul class="comments">
         {{ commenttree(comments, room, g.user, request.base_url) }}
