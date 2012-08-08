@@ -121,7 +121,7 @@ def edit_ad(url):
     if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
         abort(404)
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
-    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
+    if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = RoomForm()
     form.starting.flags.is_date = True
@@ -147,7 +147,7 @@ def view_ad(url):
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
     if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
-    # URL is okay. Show the proposal.
+    # URL is okay. Show the ad.
     comments = Comment.query.filter_by(commentspace=room.comments, parent=None).order_by('created_at').all()
     commentform = CommentForm()
     delcommentform = DeleteCommentForm()
@@ -202,7 +202,7 @@ def hide_ad(url):
     if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
         abort(404)
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
-    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
+    if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = ConfirmActionForm()
     if form.validate_on_submit():
@@ -237,7 +237,7 @@ def unhide_ad(url):
     if room.dead or get_days_ago(room.created_at) > OLD_DAYS.days:
         abort(404)
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
-    if get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
+    if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
     form = ConfirmActionForm()
     if form.validate_on_submit():
