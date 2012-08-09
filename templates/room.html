@@ -5,7 +5,7 @@
 {% block heading %}{# Inhibit display of page-level title #}{% endblock %}
 {% block content -%}
 
-<ul>
+<ul class="unstyled">
 {% if g.user and g.user == room.user -%}
     <li><a href="{{ url_for('edit_ad', url=room.urlname) }}">Edit</a></li>
     <li><a href="{{ url_for('delete_ad', url=room.urlname) }}">Delete</a></li>
@@ -15,34 +15,46 @@
 </ul>
 
 {# FIXME: this page needs to get a better structure, but later. #}
-<table class="listing">
-  <thead>
-    <tr>
-      <th>Available</th>
-      <th>Address</th>
-      <th>City</th>
-      <th>Starting</th>
-      <th>Type</th>
-      <th>Rent</th>
-    </tr>
-  </thead>
-  <tbody class="link separator">
-    <tr>
-    <td>{{ room.is_available }}</td>
-    <td>{{ room.address }}</a></td>
-    <td>{{ room.city }}</a></td>
-    <td>{{ room.starting }}</a></td>
-    <td>{{ room.room_type }}</a></td>
-    <td>{{ room.room_rent }}</a></td>
-    </tr>
-  <tbody>
-</table>
-<div id="map_container">
-{%- set gmap="http://maps.googleapis.com/maps/api/staticmap?zoom=16&size=450x450&sensor=false&" -%}
-{%- set coords="%s,%s" %(room.latitude, room.longitude) %}
-<a href="https://maps.google.com/maps?q={{ coords }}" target="_blank">
-<img src="{{ gmap }}center={{ coords }}&markers=color:blue|label:A|{{ coords }}" />
-</a>
+<div class="row show-ad">
+  <div class="span2">
+    <img src="{{ room.user.email | gravatar }}" />
+  </div>
+  <div class="span5{% if room.is_available %} available{% endif %}">
+    {%- set link=url_for('view_ad', url=room.urlname) -%}
+    <a href="{{ url_for('view_ad', url=room.urlname) }}" class="created">{{ room.created_at | datetimeformat}}</a>
+    <address>
+      {{ room.city }} <br/>
+    </address>
+    <address>
+      {{ room.address }} <br/>
+    </address>
+    <span class="rent">Rs. {{ room.room_rent }}</span>
+    <ul class="unstyled">
+      <li>
+        <span class="starting">{% if room.is_available %}
+          Available
+          {% else %}
+          Required
+          {% endif %}
+          from: {{ room.starting }}</span>
+      </li>
+      <!-- FIXME -->
+      <li>Type: <span class="type">{{ room.room_type }}</span></li>
+    </ul>
+  </div>
+  <div class="span3">
+    {{ room.room_description }}
+  </div>
+</div>
+
+<div class="row">
+  <div id="map_container">
+    {%- set gmap="http://maps.googleapis.com/maps/api/staticmap?zoom=16&size=450x450&sensor=false&" -%}
+    {%- set coords="%s,%s" %(room.latitude, room.longitude) %}
+    <a href="https://maps.google.com/maps?q={{ coords }}" target="_blank">
+      <img src="{{ gmap }}center={{ coords }}&markers=color:blue|label:A|{{ coords }}" />
+    </a>
+  </div>
 </div>
     {% if comments %}
       <ul class="comments">
@@ -51,7 +63,7 @@
     {% endif %}
     {% if not g.user -%}
       <p>
-        <a href="{{ url_for('login') }}">Login with Twitter or Google to leave a comment &rarr;</a>
+        <a href="{{ url_for('login') }}">Login to leave a comment &rarr;</a>
       </p>
     {% else -%}
       <p id="toplevel-comment" class="hidden">
