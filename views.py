@@ -92,7 +92,6 @@ def post_ad():
 
         # FIXME: Add filters for other parameters as well. Distance is not the
         # only thing! Need to decide what the other paramerters are.
-
         if room.is_available: # ad poster is looking for a person...
             t = Room.distance_subquery(coords, Room.radius)
             rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= Room.radius, Room.id == t.c.id).filter(Room.is_available != form.is_available.data).order_by(t.c.distance).all()
@@ -104,10 +103,11 @@ def post_ad():
                 send_email_found_room(r.user, room, distance)
             else: # ad poster is looking for a room.
                 send_email_found_person(r.user, room, distance)
-            # FIXME: User should also be redirected to list of all available
-            # rooms meeting criteria, or all users meeting  criteria...
-            # because emails will be sent only for 'new' users/rooms.
-        return redirect(url_for('view_ad', url=room.urlname))
+        flash("Your ad has been posted. Go to 'My ads' to view it.", category="info")
+
+        # FIXME: Use a different template that shows distances too... 
+        rooms = [r for r, d in rooms_distance]
+        return render_template('index.html', rooms=rooms)
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
                             submit="Post ad")
@@ -284,6 +284,13 @@ def delete_ad(url):
         message=u"Do you really wish to delete your ad for '%s, %s'? "
                 u"This will remove all comments as well. This operation "
                 u"is permanent and cannot be undone." % (room.address, room.city))
+
+@app.route('/ads/user/<user_id>')
+@lastuser.requires_login
+def user_ads(user_id):
+    rooms = Room.query.filter_by(user_id=user_id).order_by(db.desc('created_at')).all()
+    # FIXME: Use a different template, later (can be very similar...)
+    return render_template('index.html', rooms=rooms)
 
 @app.route('/contact')
 def contact():
