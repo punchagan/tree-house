@@ -169,7 +169,7 @@ class Room(BaseMixin, db.Model):
         lat1, lng1 = coord1
         lat2, lng2 = coord2
         f = db.func
-        haversine = 3959 * f.acos(
+        haversine = 6371 * f.acos(
                             f.cos(f.radians(lat1)) * f.cos(f.radians(lat2)) *
                                 f.cos( f.radians(lng2) - f.radians(lng1) ) +
                             f.sin(f.radians(lat1)) * f.sin(f.radians(lat2))
