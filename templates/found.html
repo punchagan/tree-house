@@ -1,0 +1,41 @@
+{% extends "includes/layout.html" %}
+{% block content %}
+{% for room_d in rooms_distance %}
+{% set room=room_d[0] %}
+{% set distance=room_d[1] %}
+<div class="row show-ad">
+  <div class="span2">
+    <span class="distance">{{ distance|round(1) }}</span>
+  </div>
+  <div class="span5{% if room.is_available %} available{% endif %}">
+    {%- set link=url_for('view_ad', url=room.urlname) -%}
+    <a href="{{ url_for('view_ad', url=room.urlname) }}" class="created">{{ room.created_at | datetimeformat}}</a>
+    <address>
+      {{ room.city }} <br/>
+    </address>
+    <address>
+      {{ room.address }} <br/>
+    </address>
+    <span class="rent">Rs. {{ room.room_rent }}</span>
+    <ul class="unstyled">
+      <li>
+        <span class="starting">{% if room.is_available %}
+          Available
+          {% else %}
+          Required
+          {% endif %}
+          from: {{ room.starting }}</span>
+      </li>
+      <!-- FIXME -->
+      <li>Type: <span class="type">{{ room.room_type }}</span></li>
+    </ul>
+  </div>
+  <div class="span3">
+    {{ room.room_description }}
+  </div>
+</div>
+{% else %}
+<!-- FIXME -->
+No Ads!
+{% endfor %}
+{% endblock %}

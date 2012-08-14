@@ -104,10 +104,7 @@ def post_ad():
             else: # ad poster is looking for a room.
                 send_email_found_person(r.user, room, distance)
         flash("Your ad has been posted. Go to 'My ads' to view it.", category="info")
-
-        # FIXME: Use a different template that shows distances too... 
-        rooms = [r for r, d in rooms_distance]
-        return render_template('index.html', rooms=rooms)
+        return render_template('found.html', rooms_distance=rooms_distance)
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
                             submit="Post ad")
