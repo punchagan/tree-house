@@ -4,8 +4,13 @@ $(document).ready( function () {
   // FIXME: Add a spinner kinda thing, when geocoding is happening...
   $(fetch).appendTo($('#field-city .controls'));
   var note = "Enter address & click Fetch co-ordinates";
-  $('#field-latitude #latitude').attr('readonly', true).val(note);
-  $('#field-longitude #longitude').attr('readonly', true).val(note);
+  var $latitude = $('#field-latitude #latitude');
+  $latitude.attr('readonly', true);
+  if ($latitude.val() == '') {$latitude.val(note)};
+
+  var $longitude = $('#field-longitude #longitude');
+  $longitude.attr('readonly', true);
+  if ($longitude.val() == '') {$longitude.val(note)};
   $('<a>').attr('id', 'map-url').insertAfter($(fetch));
 });
 
@@ -26,7 +31,6 @@ var address_to_coordinates = function() {
         var url = "https://maps.google.com/maps?q="+lat+",+"+lng;
         $('#field-latitude #latitude').val(lat);
         $('#field-longitude #longitude').val(lng);
-        // $('#map-url').text('Go there!').attr('href', url).attr('target', '_blank');
       }
       else {
         console.log("Geocoding failed: " + status);
