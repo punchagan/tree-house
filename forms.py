@@ -3,54 +3,92 @@
 import flask.ext.wtf as wtf
 
 # FIXME: It is "clear", we need two different forms (or js modified forms) for
-# the two different kinds of ads
+# the two different kinds of ads. Why is it clear? When did it become clear?
+# How is it clear?
 
-class RoomForm(wtf.Form):
-    # FIXME: may be required when using lastuser, since email maynot be available
+class AvailableAdForm(wtf.Form):
     email = wtf.html5.EmailField('Your email address',
                                  validators=[wtf.Required(), wtf.Email()],
             description="An email address for contact. Not displayed anywhere")
 
     address = wtf.TextField('Street Address', validators=[wtf.Required()],
-        description="Address of the location of your room, or in whose" + \
+        description="Address of the location of your acco., or in whose " + \
         "vicinity you want to search.  For better results use landmarks nearby.")
-    # FIXME: May later be changed to a 'drop down'
+
     city = wtf.TextField('City', validators=[wtf.Required()])
+
     # These fields will become readonly, thanks to js.
     latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
     longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
+
     radius = wtf.FloatField('Radius of ROI')
 
-    is_available = wtf.BooleanField('Available or Wanted?',
-        description="Check this box if you have a Ghosla and are looking for tenants.")
-
-    starting = wtf.DateField('Available/Required from',
+    starting = wtf.DateField('Available from',
                              description="Enter a date in yyyy-mm-dd format.",
                              validators=[wtf.Required()])
 
-    room_type = wtf.RadioField('Room Type', coerce=int,
+    room_type = wtf.SelectField('Acco. Type', coerce=int,
                                 validators=[wtf.Required()],
                                 choices=[
-                                    (0, 'Paying Guest'),
-                                    (1, '1 BHK'),
-                                    (2, '2 BHK'),
-                                    (3, '3 BHK'),
-                                    (4, 'Studio'),
-                                    (5, 'Others')
-                                    ])
-    room_rent = wtf.IntegerField('Rent', validators=[wtf.Required()])
-    room_pref = wtf.RadioField('Tenant Preference', coerce=int,
-                                choices=[
-                                    (0, 'Family'),
-                                    (1, 'Male'),
-                                    (2, 'Female'),
-                                    (3, 'Student'),
-                                    (4, 'Others'),
+                                        (2, 'Paying Guest'),
+                                        (3, '1 BHK'),
+                                        (5, '2 BHK'),
+                                        (7, '3 BHK'),
+                                        (11, 'Studio'),
+                                        (13, 'Others')
                                 ])
+
+    room_rent = wtf.IntegerField('Rent', description="Enter only numerals.  "
+                        "A range of +/- 25% will be considered in searches?.",
+            validators=[wtf.Required(),
+                        wtf.NumberRange(min=0,
+                                        message="Enter only numerals (0-9)")])
+
+    room_pref = wtf.SelectMultipleField('Tenant Preference', coerce=int,
+                                        choices=[
+                                            (2, 'Family'),
+                                            (3, 'Male'),
+                                            (5, 'Female'),
+                                            (7, 'Student'),
+                                            (11, 'Others'),
+                                        ])
+
     room_description = wtf.TextAreaField('Description',
                     validators=[wtf.Required()],
                     description='Any additional description about the room.')
 
+    # FIXME: over-ride process and populate_obj methods to do the prime number magic required
+
+class WantedAdForm(AvailableAdForm):
+
+    starting = wtf.DateField('Wanted from',
+                             description="Enter a date in yyyy-mm-dd format.",
+                             validators=[wtf.Required()])
+
+    room_type = wtf.SelectMultipleField('Acco. Type', coerce=int,
+                                        validators=[wtf.Required()],
+                                        choices=[
+                                            (2, 'Paying Guest'),
+                                            (3, '1 BHK'),
+                                            (5, '2 BHK'),
+                                            (7, '3 BHK'),
+                                            (11, 'Studio'),
+                                            (13, 'Others')
+                                        ])
+
+    #FIXME: this should be tenant_type?
+    room_pref = wtf.SelectField('Acco. required for', coerce=int,
+                                choices=[
+                                    (2, 'Family'),
+                                    (3, 'Male'),
+                                    (5, 'Female'),
+                                    (7, 'Student'),
+                                    (11, 'Others'),
+                                ])
+
+    room_description = wtf.TextAreaField('Description',
+                    validators=[wtf.Required()],
+                    description='Any additional description of your requirements.')
 
 class CommentForm(wtf.Form):
     parent_id = wtf.HiddenField('Parent', default="", id="comment_parent_id")

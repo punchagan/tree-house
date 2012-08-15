@@ -13,9 +13,10 @@ from coaster.views import get_next_url
 
 # Local imports
 from app import app
-from forms import RoomForm, ConfirmActionForm, CommentForm, DeleteCommentForm
+from forms import (AvailableAdForm, WantedAdForm, ConfirmActionForm,
+    CommentForm, DeleteCommentForm)
 from models import db, User, Room, OccupiedSpace, Comment, Occupied
-from utils import get_days_ago
+from utils import get_days_ago, factorize, product
 from mailclient import send_email_found_person, send_email_found_room
 
 lastuser = LastUser(app)
@@ -72,15 +73,23 @@ def lastuser_error(error, error_description=None, error_uri=None):
 def about():
     return render_template('about.html')
 
-@app.route('/new', methods=['GET', 'POST'])
+@app.route('/new/<type>', methods=['GET', 'POST'])
 @lastuser.requires_login
-def post_ad():
-    form = RoomForm()
+def post_ad(type='available'):
+    is_available = type == 'available'
+    if is_available:
+        form = AvailableAdForm()
+    else:
+        form = WantedAdForm()
     form.starting.flags.is_date = True
     if request.method == 'GET':
         form.email.data = g.user.email
     if form.validate_on_submit():
-        room = Room(user=g.user)
+        room = Room(user=g.user, is_available=is_available)
+        if room.is_available:
+            form.room_pref.data = product(form.room_pref.data)
+        else:
+            form.room_type.data = product(form.room_type.data)
         form.populate_obj(room)
         room.urlname = str(uuid4())[:8]
         db.session.add(room)
@@ -92,18 +101,19 @@ def post_ad():
 
         # FIXME: Add filters for other parameters as well. Distance is not the
         # only thing! Need to decide what the other paramerters are.
-        if room.is_available: # ad poster is looking for a person...
+        if is_available: # ad poster is looking for a person...
             t = Room.distance_subquery(coords, Room.radius)
-            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= Room.radius, Room.id == t.c.id).filter(Room.is_available != form.is_available.data).order_by(t.c.distance).all()
+            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= Room.radius, Room.id == t.c.id).filter(Room.is_available != room.is_available).order_by(t.c.distance).all()
         else: # ad poster is looking for a room...
             t = Room.distance_subquery(coords, room.radius)
-            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= room.radius, Room.id == t.c.id).filter(Room.is_available != form.is_available.data).order_by(t.c.distance).all()
+            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= room.radius, Room.id == t.c.id).filter(Room.is_available != room.is_available).order_by(t.c.distance).all()
         for r, distance in rooms_distance:
             if room.is_available: # ad poster is looking for a person
                 send_email_found_room(r.user, room, distance)
             else: # ad poster is looking for a room.
                 send_email_found_person(r.user, room, distance)
         flash("Your ad has been posted. Go to 'My ads' to view it.", category="info")
+        # FIXME: should this really be a redirect to a "search" url?
         return render_template('found.html', rooms_distance=rooms_distance)
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
@@ -120,12 +130,23 @@ def edit_ad(url):
     occupied = Occupied.query.filter_by(space=room.occupieds).order_by('created_at').first()
     if occupied and get_days_ago(occupied.created_at) > OCCUPIED_DAYS.days:
         abort(404)
-    form = RoomForm()
+    if room.is_available:
+        form = AvailableAdForm()
+    else:
+        form = WantedAdForm()
     form.starting.flags.is_date = True
     if request.method == 'GET':
         form.process(obj=room)
+        if room.is_available:
+            form.room_pref.data = factorize(room.room_pref)
+        else:
+            form.room_type.data = factorize(room.room_type)
         form.email.data = g.user.email
     elif form.validate_on_submit():
+        if room.is_available:
+            form.room_pref.data = product(form.room_pref.data)
+        else:
+            form.room_type.data = product(form.room_type.data)
         form.populate_obj(room)
         db.session.commit()
         return redirect(url_for('view_ad', url=room.urlname))

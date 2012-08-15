@@ -9,19 +9,20 @@ __all__ = ['db', 'User', 'Room']
 db = SQLAlchemy(app)
 
 class ROOM_TYPES:
-    PG = 0
-    BHK1 = 1
-    BHK2 = 2
-    BHK3 = 3
-    STUDIO = 4
-    OTHERS = 5
+    # Trying a trick with primes...
+    PG = 2
+    BHK1 = 3
+    BHK2 = 5
+    BHK3 = 7
+    STUDIO = 11
+    OTHERS = 13
 
 class ROOM_PREF:
-    FAMILY = 0
-    MALE = 1
-    FEMALE = 2
-    STUDENTS = 3
-    OTHERS = 4
+    FAMILY = 2
+    MALE = 3
+    FEMALE = 5
+    STUDENTS = 7
+    OTHERS = 11
 
 class COMMENTSTATUS:
     PUBLIC = 0
