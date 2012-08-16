@@ -9,9 +9,11 @@
 {% if g.user and g.user == room.user -%}
     <li><a href="{{ url_for('edit_ad', url=room.urlname) }}">Edit</a></li>
     <li><a href="{{ url_for('delete_ad', url=room.urlname) }}">Delete</a></li>
+    <! --FIXME -- Add a link for matching ads ...!>
 {% endif -%}
     <li><a href="{{ url_for('unhide_ad', url=room.urlname) }}">Mark as available</a></li>
     <li><a href="{{ url_for('hide_ad', url=room.urlname) }}">Mark as occupied</a></li>
+    <! --FIXME -- Add a link for similar ads ...!>
 </ul>
 
 {# FIXME: this page needs to get a better structure, but later. #}

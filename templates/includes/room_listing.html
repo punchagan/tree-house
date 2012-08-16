@@ -1,17 +1,6 @@
-{% extends "includes/layout.html" %}
-{% block content %}
-{% include "includes/room_listing.html" %}
-<div class="row show-ad">
-    <div class="span10">
-        <h1>The following rooms match your criteria ...</h1>
-    </div>
-</div>
-{% for room_d in rooms_distance %}
-{% set room=room_d[0] %}
-{% set distance=room_d[1] %}
 <div class="row show-ad">
   <div class="span2">
-    <span class="distance">{{ distance|round(1) }}</span>
+    <img src="{{ room.user.email | gravatar }}" />
   </div>
   <div class="span5{% if room.is_available %} available{% endif %}">
     {%- set link=url_for('view_ad', url=room.urlname) -%}
@@ -40,8 +29,3 @@
     {{ room.room_description }}
   </div>
 </div>
-{% else %}
-<!-- FIXME -->
-No Ads!
-{% endfor %}
-{% endblock %}

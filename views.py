@@ -14,7 +14,7 @@ from coaster.views import get_next_url
 # Local imports
 from app import app
 from forms import (AvailableAdForm, WantedAdForm, ConfirmActionForm,
-    CommentForm, DeleteCommentForm)
+    CommentForm, DeleteCommentForm, SearchForm)
 from models import db, User, Room, OccupiedSpace, Comment, Occupied
 from utils import get_days_ago, factorize, product
 from mailclient import send_email_found_person, send_email_found_room
@@ -95,26 +95,17 @@ def post_ad(type='available'):
         db.session.add(room)
         db.session.commit()
 
-        coords = form.latitude.data, form.longitude.data
-        # FIXME: Rooms is a REALLY BAD NAME!  It should be ads or posts or ...
-        # Search for rooms/ads that are in ROI and have opposite is_available flag
-
-        # FIXME: Add filters for other parameters as well. Distance is not the
-        # only thing! Need to decide what the other paramerters are.
-        if is_available: # ad poster is looking for a person...
-            t = Room.distance_subquery(coords, Room.radius)
-            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= Room.radius, Room.id == t.c.id).filter(Room.is_available != room.is_available).order_by(t.c.distance).all()
-        else: # ad poster is looking for a room...
-            t = Room.distance_subquery(coords, room.radius)
-            rooms_distance = db.session.query(Room, t.c.distance).filter(t.c.distance <= room.radius, Room.id == t.c.id).filter(Room.is_available != room.is_available).order_by(t.c.distance).all()
+        # Search for matching rooms
+        rooms_distance = Room.search_rooms(room)
+        # Send emails to interested users
         for r, distance in rooms_distance:
             if room.is_available: # ad poster is looking for a person
                 send_email_found_room(r.user, room, distance)
             else: # ad poster is looking for a room.
                 send_email_found_person(r.user, room, distance)
-        flash("Your ad has been posted. Go to 'My ads' to view it.", category="info")
-        # FIXME: should this really be a redirect to a "search" url?
-        return render_template('found.html', rooms_distance=rooms_distance)
+
+        flash("Your ad has been posted!", category="info")
+        return render_template('found.html', room=room, rooms_distance=rooms_distance)
     return render_template('autoform.html', form=form,
                             title="Post a new advertisement",
                             submit="Post ad")
@@ -309,6 +300,10 @@ def user_ads(user_id):
     rooms = Room.query.filter_by(user_id=user_id).order_by(db.desc('created_at')).all()
     # FIXME: Use a different template, later (can be very similar...)
     return render_template('index.html', rooms=rooms)
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    pass
 
 @app.route('/contact')
 def contact():

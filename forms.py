@@ -2,10 +2,6 @@
 
 import flask.ext.wtf as wtf
 
-# FIXME: It is "clear", we need two different forms (or js modified forms) for
-# the two different kinds of ads. Why is it clear? When did it become clear?
-# How is it clear?
-
 class AvailableAdForm(wtf.Form):
     email = wtf.html5.EmailField('Your email address',
                                  validators=[wtf.Required(), wtf.Email()],
@@ -20,8 +16,6 @@ class AvailableAdForm(wtf.Form):
     # These fields will become readonly, thanks to js.
     latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
     longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
-
-    radius = wtf.FloatField('Radius of ROI')
 
     starting = wtf.DateField('Available from',
                              description="Enter a date in yyyy-mm-dd format.",
@@ -54,12 +48,13 @@ class AvailableAdForm(wtf.Form):
                                         ])
 
     room_description = wtf.TextAreaField('Description',
-                    validators=[wtf.Required()],
+                    validators=[wtf.Required(), wtf.Length(max=1024)],
                     description='Any additional description about the room.')
 
-    # FIXME: over-ride process and populate_obj methods to do the prime number magic required
-
 class WantedAdForm(AvailableAdForm):
+
+    radius = wtf.FloatField('Radius of interest',
+        description="Distance in kms. Only ads in this radius will be notified.")
 
     starting = wtf.DateField('Wanted from',
                              description="Enter a date in yyyy-mm-dd format.",
@@ -87,8 +82,11 @@ class WantedAdForm(AvailableAdForm):
                                 ])
 
     room_description = wtf.TextAreaField('Description',
-                    validators=[wtf.Required()],
+                    validators=[wtf.Required(), wtf.Length(max=1024)],
                     description='Any additional description of your requirements.')
+
+class SearchForm(wtf.Form):
+    pass
 
 class CommentForm(wtf.Form):
     parent_id = wtf.HiddenField('Parent', default="", id="comment_parent_id")
