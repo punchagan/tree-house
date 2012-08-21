@@ -86,7 +86,44 @@ class WantedAdForm(AvailableAdForm):
                     description='Any additional description of your requirements.')
 
 class SearchForm(wtf.Form):
-    pass
+
+    is_available = wtf.BooleanField('Search for people?',
+        description="Check if you have accomodation and are looking for prospective tenants")
+
+    address = wtf.TextField('Street Address', validators=[wtf.Required()],
+        description="Address of the in whose vicinity you want to search."
+        "For better results use landmarks nearby.")
+
+    city = wtf.TextField('City', validators=[wtf.Required()])
+
+    # These fields will become readonly, thanks to js.
+    latitude = wtf.FloatField('Latitude', validators=[wtf.Required()])
+    longitude = wtf.FloatField('Longitude', validators=[wtf.Required()])
+
+    radius = wtf.FloatField('Radius of interest', validators=[wtf.Required()],
+        description="Distance in kms. Only ads in this radius will be notified.")
+
+    room_type = wtf.SelectField('Acco. Type', coerce=int,
+                                choices=[
+                                        (0, '---'),
+                                        (2, 'Paying Guest'),
+                                        (3, '1 BHK'),
+                                        (5, '2 BHK'),
+                                        (7, '3 BHK'),
+                                        (11, 'Studio'),
+                                        (13, 'Others')
+                                ], description="Leave blank to search all types.")
+
+    room_pref = wtf.SelectField('Tenant Type', coerce=int,
+                                choices=[
+                                    (0, '---'),
+                                    (2, 'Family'),
+                                    (3, 'Male'),
+                                    (5, 'Female'),
+                                    (7, 'Student'),
+                                    (11, 'Others'),
+                                ], description="Leave blank to search all types.")
+
 
 class CommentForm(wtf.Form):
     parent_id = wtf.HiddenField('Parent', default="", id="comment_parent_id")
