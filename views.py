@@ -32,6 +32,7 @@ def index():
         return redirect(url_for('search'))
     all_rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at'))
     now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
+    # FIXME: No point showing all.. Show first 50 ads? or Just show the search page! or My Ads page?
     rooms = all_rooms.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS).filter(db.func.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at))).all()
     return render_template('index.html', rooms=rooms)
 
@@ -324,15 +325,6 @@ def search():
 @app.route('/contact')
 def contact():
     return 'Coming soon!'
-
-@app.route('/distance/<coordinates>')
-@lastuser.requires_login
-def calculate_distance(coordinates):
-    coords = [float(num) for num in coordinates.split(',')]
-    drange = 3 # Distance in Kilometers
-    t = Room.distance_subquery(coords, drange)
-    rooms = db.session.query(Room, t.c.distance).filter(t.c.distance <= drange, Room.id == t.c.id).order_by(t.c.distance).all()
-    return 'Found %d room(s)<br/>' %len(rooms) + str(rooms)
 
 @app.template_filter('age')
 def age(dt):

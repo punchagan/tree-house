@@ -198,6 +198,7 @@ class Room(BaseMixin, db.Model):
         f = db.func
         t = Room.distance_subquery(coords, Room.radius)
         r_ = db.session.query(Room, t.c.distance).filter(Room.is_available != room.is_available)
+        # FIXME: Remove deleted and occupied rooms, etc!
         r_ = r_.order_by(t.c.distance).order_by(db.desc('created_at'))
         if room.room_rent:
             r_ = r_.filter(room.room_rent * 0.75 < Room.room_rent < room.room_rent * 1.25).order_by('room_rent')
