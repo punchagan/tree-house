@@ -197,15 +197,16 @@ class Room(BaseMixin, db.Model):
         coords = room.latitude, room.longitude
         f = db.func
         t = Room.distance_subquery(coords, Room.radius)
-        r_filtered = db.session.query(Room, t.c.distance).filter(Room.is_available != room.is_available)
-        r_rent = r_filtered.filter(room.room_rent * 0.75 < Room.room_rent < room.room_rent * 1.25)
-        r_ordered = r_rent.order_by(t.c.distance).order_by(db.desc('created_at')).order_by('room_rent')
+        r_ = db.session.query(Room, t.c.distance).filter(Room.is_available != room.is_available)
+        r_ = r_.order_by(t.c.distance).order_by(db.desc('created_at'))
+        if room.room_rent:
+            r_ = r_.filter(room.room_rent * 0.75 < Room.room_rent < room.room_rent * 1.25).order_by('room_rent')
         if room.is_available: # ad poster is looking for a person...
-            r_pref = r_ordered.filter(f.mod(room.room_pref, Room.room_pref) == 0)
-            r_type = r_pref.filter(f.mod(Room.room_type, room.room_type) == 0)
-            rooms_distance = r_type.filter(t.c.distance <= Room.radius, Room.id == t.c.id).all()
+            r_ = r_.filter(f.mod(room.room_pref, Room.room_pref) == 0)
+            r_ = r_.filter(f.mod(Room.room_type, room.room_type) == 0)
+            rooms_distance = r_.filter(t.c.distance <= Room.radius, Room.id == t.c.id).all()
         else: # ad poster is looking for a room...
-            r_pref = r_ordered.filter(f.mod(Room.room_pref, room.room_pref) == 0)
-            r_type = r_pref.filter(f.mod(room.room_type, Room.room_type) == 0)
-            rooms_distance = r_type.filter(t.c.distance <= room.radius, Room.id == t.c.id).all()
+            r_ = r_.filter(f.mod(Room.room_pref, room.room_pref) == 0)
+            r_ = r_.filter(f.mod(room.room_type, Room.room_type) == 0)
+            rooms_distance = r_.filter(t.c.distance <= room.radius, Room.id == t.c.id).all()
         return rooms_distance

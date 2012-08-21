@@ -1,6 +1,8 @@
 {% extends "includes/layout.html" %}
 {% block content %}
-{% include "includes/room_listing.html" %}
+{% if room %}
+  {% include "includes/room_listing.html" %}
+{% endif %}
 <div class="row show-ad">
     <div class="span10">
         <h1>The following rooms match your criteria ...</h1>

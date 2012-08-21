@@ -303,7 +303,24 @@ def user_ads(user_id):
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    pass
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        room = Room()
+        form.populate_obj(room)
+
+        # Change room_pref and room_type if they are None
+        if not room.room_pref:
+            room.room_pref = 0 if room.is_available else 1
+        if not room.room_type:
+            room.room_type = 1 if room.is_available else 0
+
+        # Search for matching rooms
+        rooms_distance = Room.search_rooms(room)
+        return render_template('found.html', rooms_distance=rooms_distance)
+    return render_template('autoform.html', form=form,
+                            title="Search Acco.",
+                            submit="Search ad")
 
 @app.route('/contact')
 def contact():
