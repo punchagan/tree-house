@@ -28,9 +28,8 @@ OCCUPIED_DAYS = timedelta(2)
 
 @app.route('/')
 def index():
-    # FIXME: Think about what the index page should be like
     if not g.user:
-        return render_template('about.html')
+        return redirect(url_for('search'))
     all_rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at'))
     now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
     rooms = all_rooms.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS).filter(db.func.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at))).all()
