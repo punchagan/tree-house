@@ -2,7 +2,7 @@
 
 # Standard libary imports
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import datetime
 from hashlib import md5
 
 # Hasgeek imports
@@ -15,14 +15,13 @@ from coaster.views import get_next_url
 from app import app
 from forms import (AvailableAdForm, WantedAdForm, ConfirmActionForm,
     CommentForm, DeleteCommentForm, SearchForm)
-from models import db, User, Room, OccupiedSpace, Comment, Occupied
+from models import (db, User, Room, OccupiedSpace, Comment, Occupied, OLD_DAYS,
+    OCCUPIED_DAYS)
 from utils import get_days_ago, factorize, product
 from mailclient import send_email_found_person, send_email_found_room
 
 lastuser = LastUser(app)
 lastuser.init_usermanager(UserManager(db, User))
-OLD_DAYS = timedelta(21)
-OCCUPIED_DAYS = timedelta(2)
 
 # --- Routes: --------------------------------------------------------------
 

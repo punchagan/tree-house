@@ -1,3 +1,8 @@
+from datetime import datetime, timedelta
+
+OLD_DAYS = timedelta(21)
+OCCUPIED_DAYS = timedelta(2)
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.lastuser.sqlalchemy import UserBase
 
@@ -196,10 +201,14 @@ class Room(BaseMixin, db.Model):
         """
         coords = room.latitude, room.longitude
         f = db.func
+        now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
+
         t = Room.distance_subquery(coords, Room.radius)
         r_ = db.session.query(Room, t.c.distance).filter(Room.is_available != room.is_available)
-        # FIXME: Remove deleted and occupied rooms, etc!
+        r_ = r_.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS)
+        r_ = r_.filter(f.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at)))
         r_ = r_.order_by(t.c.distance).order_by(db.desc('created_at'))
+
         if room.room_rent:
             r_ = r_.filter(room.room_rent * 0.75 < Room.room_rent < room.room_rent * 1.25).order_by('room_rent')
         if room.is_available: # ad poster is looking for a person...
