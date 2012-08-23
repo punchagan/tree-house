@@ -25,16 +25,6 @@ lastuser.init_usermanager(UserManager(db, User))
 
 # --- Routes: --------------------------------------------------------------
 
-@app.route('/')
-def index():
-    if not g.user:
-        return redirect(url_for('search'))
-    all_rooms = Room.query.order_by(db.desc('is_available')).order_by(db.desc('created_at'))
-    now = datetime.strptime(datetime.now().strftime("%Y %m %d %H %M %S"), "%Y %m %d %H %M %S") # remove microseconds
-    # FIXME: No point showing all.. Show first 50 ads? or Just show the search page! or My Ads page?
-    rooms = all_rooms.filter(Room.dead==False).filter(Room.created_at > now-OLD_DAYS).filter(db.func.not_(Room.occupieds.has(now - OCCUPIED_DAYS < Occupied.created_at))).all()
-    return render_template('index.html', rooms=rooms)
-
 @app.route('/login')
 @lastuser.login_handler
 def login():
@@ -68,14 +58,35 @@ def lastuser_error(error, error_description=None, error_uri=None):
 
 # --- Routes: ads ------------------------------------------------------------
 
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    form = SearchForm()
+
+    if form.validate_on_submit():
+        room = Room()
+        form.populate_obj(room)
+
+        # Change room_pref and room_type if they are None
+        if not room.room_pref:
+            room.room_pref = 0 if room.is_available else 1
+        if not room.room_type:
+            room.room_type = 1 if room.is_available else 0
+
+        # Search for matching rooms
+        rooms_distance = Room.search_rooms(room)
+        return render_template('found.html', rooms_distance=rooms_distance)
+    return render_template('autoform.html', form=form,
+                            title="Search Acco.",
+                            submit="Search ad")
+
 @app.route('/about')
 def about():
     return render_template('about.html')
 
-@app.route('/new/<type>', methods=['GET', 'POST'])
+@app.route('/new/<state>', methods=['GET', 'POST'])
 @lastuser.requires_login
-def post_ad(type='available'):
-    is_available = type == 'available'
+def post_ad(state='available'):
+    is_available = state == 'available'
     if is_available:
         form = AvailableAdForm()
     else:
@@ -299,27 +310,6 @@ def user_ads(user_id):
     rooms = Room.query.filter_by(user_id=user_id).order_by(db.desc('created_at')).all()
     # FIXME: Use a different template, later (can be very similar...)
     return render_template('index.html', rooms=rooms)
-
-@app.route('/search', methods=['GET', 'POST'])
-def search():
-    form = SearchForm()
-
-    if form.validate_on_submit():
-        room = Room()
-        form.populate_obj(room)
-
-        # Change room_pref and room_type if they are None
-        if not room.room_pref:
-            room.room_pref = 0 if room.is_available else 1
-        if not room.room_type:
-            room.room_type = 1 if room.is_available else 0
-
-        # Search for matching rooms
-        rooms_distance = Room.search_rooms(room)
-        return render_template('found.html', rooms_distance=rooms_distance)
-    return render_template('autoform.html', form=form,
-                            title="Search Acco.",
-                            submit="Search ad")
 
 @app.route('/contact')
 def contact():

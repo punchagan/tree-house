@@ -48,8 +48,8 @@
           <div class="nav-collapse">
             <ul class="nav">
               <li class="active"><a href="#">Home</a></li>
-              <li><a href="{{ url_for('post_ad', type='available') }}">Post Ad: Available</a></li>
-              <li><a href="{{ url_for('post_ad', type='wanted') }}">Post Ad: Wanted</a></li>
+              <li><a href="{{ url_for('post_ad', state='available') }}">Post Ad: Available</a></li>
+              <li><a href="{{ url_for('post_ad', state='wanted') }}">Post Ad: Wanted</a></li>
               <li><a href="{{ url_for('about') }}">About</a></li>
               <li><a href="{{ url_for('contact') }}">Contact</a></li>
             </ul>
